@@ -1,0 +1,11 @@
+
+.env
+# Python cache files
+__pycache__/
+models/__pycache__/
+routes/__pycache__/
+schemas/__pycache__/  
+                                        
+# IDE/editor files
+.vscode/
+.idea/
