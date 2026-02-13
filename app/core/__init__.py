@@ -9,7 +9,7 @@ from app.middleware.error_handler import setup_exception_handlers
 from contextlib import asynccontextmanager
 
 @asynccontextmanager
-async def lifespan():
+async def lifespan(app: FastAPI):
     await init_db()
     yield
 

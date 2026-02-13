@@ -28,12 +28,7 @@ class Settings(BaseSettings):
     # --- Database Configuration ---
     DATABASE_URL: str
     SQLALCHEMY_TRACK_MODIFICATIONS: bool
-
-    # --- Security ---
-    SECRET_KEY: str
-    ALGORITHM: str
-    ACCESS_TOKEN_EXPIRE_MINUTES: int
-
+    
     # --- CORS Configuration ---
     CORS_ORIGINS: list[str]
 
