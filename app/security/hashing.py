@@ -2,9 +2,8 @@ import bcrypt
 import hashlib
 
 
-
 def hash_password(pwd: str) -> bytes:
-    return bcrypt.hashpw(pwd.encode(),bcrypt.gensalt())
+    return bcrypt.hashpw(pwd.encode(), bcrypt.gensalt())
 
 
 def verify_password(plain_pwd: str, hashed_pwd: bytes) -> bool:
