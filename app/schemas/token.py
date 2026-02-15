@@ -3,7 +3,7 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 
-class TokenModel(BaseModel):
+class TokenRequest(BaseModel):
     sub: UUID
     token_hash: bytes = Field(alias="token")
     jti: UUID
