@@ -43,7 +43,9 @@ async def custom_exception_handler(request: Request, exc: ExceptionHelper):
     return response_helper(**content)
 
 
-async def custom_validation_error_handler(request: Request, exc: RequestValidationError):
+async def custom_validation_error_handler(
+    request: Request, exc: RequestValidationError
+):
     error = exc.errors()[0]
     logging.error(f"Validation error: {error}", exc_info=False)
     response_status = status.HTTP_422_UNPROCESSABLE_CONTENT
@@ -58,4 +60,4 @@ async def custom_validation_error_handler(request: Request, exc: RequestValidati
 def setup_exception_handlers(app):
     app.add_exception_handler(ExceptionHelper, custom_exception_handler)
     app.add_exception_handler(RequestValidationError, custom_validation_error_handler)
-    app.add_exception_handler(Exception,global_exception_handler)
+    app.add_exception_handler(Exception, global_exception_handler)
