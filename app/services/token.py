@@ -1,8 +1,6 @@
-"""Example User Service"""
-
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.crud.token import crud_token
-from app.schemas.token import TokenModel
+from app.schemas.token import TokenRequest
 from app.security.hashing import get_fingerprint
 from uuid import UUID
 
@@ -20,7 +18,7 @@ class TokenService:
     @staticmethod
     async def insert(db: AsyncSession, payload: dict):
         payload["token"] = get_fingerprint(payload["token"])
-        return await crud_token.insert(db, TokenModel(**payload).model_dump())
+        return await crud_token.insert(db, TokenRequest(**payload).model_dump())
 
     @staticmethod
     async def revoke(db: AsyncSession, user_id: UUID):
