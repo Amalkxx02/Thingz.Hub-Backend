@@ -37,7 +37,7 @@ def create_app() -> FastAPI:
     # Include API routers
     app.include_router(api_router, prefix=settings.API_V1_STR)
 
-    @app.get("/")
+    @app.get("/",include_in_schema=False)
     async def root():
         """Root endpoint"""
         return {
@@ -45,7 +45,7 @@ def create_app() -> FastAPI:
             "version": settings.PROJECT_VERSION
         }
 
-    @app.get("/health")
+    @app.get("/health",include_in_schema=False)
     async def health_check():
         """Health check endpoint"""
         return {"status": "healthy"}
