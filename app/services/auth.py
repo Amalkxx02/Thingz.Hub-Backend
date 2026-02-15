@@ -2,6 +2,7 @@ from uuid import UUID, uuid4
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.crud.auth import crud_auth
+from app.crud.token import crud_token
 from app.models.auth import Auth
 from app.schemas.enums import JwtType
 from app.security.hashing import hash_password, verify_password
@@ -24,22 +25,27 @@ class AuthService:
         return await crud_auth.get_by_email(db, email)
 
     @staticmethod
-    async def insert(db: AsyncSession, payload: dict) -> str:
+    async def register(db: AsyncSession, payload: dict) -> str:
 
         email = payload["email"]
-        user: Auth = await crud_auth.get_by_email(db,email)
+        user: Auth = await crud_auth.get_by_email(db, email)
 
-        if user and user.verified:
-            return await auth_service.authenticate(db,payload)
+        if user:
+            if user.verified:
+                return {
+                    "status": "error",
+                    "message": "User is already verified. Please login.",
+                }
+            else:
+                return {
+                    "status": "pending",
+                    "message": "Email already registered but not verified. Check your inbox.",
+                }
 
         password = hash_password(payload["password"])
         payload["password"] = password
 
-        if not user:
-            await crud_auth.insert(db,payload)
-
-        if user:
-            await crud_auth.update_password(db,user.id,password)
+        await crud_auth.insert(db, payload)
 
         token = uuid4()
         expires_at = get_future_utc_time(minutes=10)
@@ -48,14 +54,13 @@ class AuthService:
             "expires_at": expires_at,
         }
 
-        verification_link = f"Verification link: http://localhost:8000/api/v1/users/verify_email?token={token}"
+        verification_link = f"Verification link: http://127.0.0.1:8000/api/v1/auths/verify?token={token}"
 
-        return verification_link,
-        
+        return verification_link
 
     @staticmethod
     async def verify(db: AsyncSession, token: UUID):
-        pending = pending_user.get(token)
+        pending: dict = pending_user.get(token)
         if not pending:
             raise HTTPException(status_code=400, detail="Invalid or Expired token")
 
@@ -75,14 +80,26 @@ class AuthService:
     async def authenticate(db: AsyncSession, payload: dict):
 
         user: Auth = await crud_auth.get_by_email(db, payload["email"])
-        if not verify_password(payload["password"], user.password):
-            raise ValueError("Auth credential mismatch")
+
+        if not user or not verify_password(payload["password"], user.password):
+            return {"status": "error", "message": "Invalid email or password."}
+
         if not user.verified:
-            raise ValueError("Auth not verified")
+            return {
+                "status": "pending",
+                "message": "Your account is not verified. Please check your email for the link.",
+            }
+
         data = {"email": user.email, "sub": str(user.id)}
         return {
+            "status": "success",
             "access": await create_token(db, data),
             "refresh": await create_token(db, data, JwtType.REFRESH),
         }
-    
+
+    @staticmethod
+    async def sign_out(db: AsyncSession, user_id: UUID):
+        await crud_token.revoke(db, user_id)
+
+
 auth_service = AuthService()
