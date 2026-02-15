@@ -1,37 +1,34 @@
-# from fastapi import APIRouter, HTTPException, Depends
-# from sqlalchemy.ext.asyncio import AsyncSession
-# from sqlalchemy.dialects.postgresql import insert
+from uuid import UUID
+from fastapi import APIRouter, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.schemas.device import DeviceRequest
+from app.security.jwt.dependency import get_current_user
+from app.services.device import device_service
+from app.database.session import get_db
 
-# from schemas.schemas import DeviceAdd
-# from app.models.device import Device
-# router = APIRouter(prefix="/api/user/devices", tags=["device"])
+router = APIRouter()
 
+@router.post("/user")
+async def user_provision_device(
+    onboard: DeviceRequest,
+    db: AsyncSession = Depends(get_db),
+    user_id:UUID = Depends(get_current_user)  
+):
+    return await device_service.register(db,onboard.model_dump(),user_id)
 
-# @router.post(
-#     "",
-#     summary="Add a device for a user",
-#     response_description="Device added confirmation",
-# )
-# async def add_device_for_user(
-#     device: DeviceAdd,
-#     db: AsyncSession = Depends(get_db),
-#     user_id=Depends(verify_access_token),
-# ):
+@router.post("/edge_device")
+async def device_handshake(
+    device_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    user_id:UUID = Depends(get_current_user)  
+):
+    return await device_service.activate(db,device_id,user_id)
 
-#     query = (
-#         insert(Device)
-#         .values(
-#             user_id=user_id,
-#             device_id=device.device_id,
-#             device_name=device.device_name,
-#         )
-#         .on_conflict_do_nothing(index_elements=["device_id"])
-#         .returning(Device)
-#     )
+@router.post("/deactivate")
+async def device_handshake(
+    device_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    user_id:UUID = Depends(get_current_user)  
+):
+    return await device_service.deactivate(db,device_id,user_id)
 
-#     # Execute query
-#     row = await db_execution(query, db)
-#     if row is None:
-#         raise HTTPException(status_code=409, detail="The device already exists")
-
-#     return {"message": "Device added successfully"}
