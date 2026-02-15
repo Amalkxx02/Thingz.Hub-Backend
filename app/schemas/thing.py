@@ -3,6 +3,7 @@ from typing import List, Union
 
 from .utils import is_list_not_empty_and_duplicate
 
+
 class Sensor(BaseModel):
     sensors: List[str]
 
