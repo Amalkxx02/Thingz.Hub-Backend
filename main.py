@@ -1,22 +1,16 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+"""Main Application Entry Point"""
+import uvicorn
+from app.core import create_app
+from app.core.config import settings
 
-from routes import users, devices, things, data_handle,things_card
+app = create_app()
 
-app = FastAPI()
 
-origins = ["http://localhost:5173","http://192.168.1.12:5173"]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-app.include_router(data_handle.router)
-app.include_router(users.router)
-app.include_router(devices.router)
-#app.include_router(rooms.router)
-app.include_router(things.router)
-app.include_router(things_card.router)
+if __name__ == "__main__":
+    uvicorn.run(
+        "main:app",
+        host=settings.HOST,
+        port=settings.PORT,
+        reload=settings.RELOAD,
+        debug=settings.DEBUG,
+    )
