@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     JWT_REFRESH_KEY:str
     JWT_REFRESH_TTL:int
 
+    # --- API_KEY_PREFIX ---
+    PREFIX:str
+
     # --- Server Configuration ---
     HOST: str
     PORT: int
@@ -27,7 +30,6 @@ class Settings(BaseSettings):
 
     # --- Database Configuration ---
     DATABASE_URL: str
-    SQLALCHEMY_TRACK_MODIFICATIONS: bool
     
     # --- CORS Configuration ---
     CORS_ORIGINS: list[str]

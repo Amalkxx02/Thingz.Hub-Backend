@@ -1,6 +1,6 @@
 import bcrypt
 import hashlib
-
+import secrets
 
 def hash_password(pwd: str) -> bytes:
     return bcrypt.hashpw(pwd.encode(), bcrypt.gensalt())
@@ -15,4 +15,4 @@ def get_fingerprint(value: str) -> bytes:
 
 
 def verify_fingerprint(value: str, fingerprint: bytes) -> bool:
-    return get_fingerprint(value) == fingerprint
+    return secrets.compare_digest(get_fingerprint(value), fingerprint)

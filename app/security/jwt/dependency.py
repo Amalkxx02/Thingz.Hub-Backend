@@ -2,8 +2,10 @@
 from uuid import UUID
 from fastapi import Depends
 from jose.exceptions import ExpiredSignatureError, JWTError
+from app.services.device import device_service
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.database import get_device_db
 from app.database.session import get_db
 from app.schemas.enums import JwtType
 from app.security.hashing import verify_fingerprint
@@ -32,6 +34,11 @@ async def _verify_and_get_user(token: str) -> UUID:
 async def get_current_user(token: str = Depends(get_current_token)) -> UUID:
     return await _verify_and_get_user(token)
 
+async def get_current_device( db: AsyncSession = Depends(get_db),token:str = Depends(get_current_token)):
+
+    if await device_service.verify_api_key(db,token):
+        print(f"wrong api key : {token}")
+    
 
 async def get_refresh(
     db: AsyncSession = Depends(get_db), token: str = Depends(get_current_token)
