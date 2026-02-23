@@ -18,10 +18,10 @@ class TokenService:
     @staticmethod
     async def insert(db: AsyncSession, payload: dict):
         payload["token"] = get_fingerprint(payload["token"])
-        return await crud_token.insert(db, TokenRequest(**payload).model_dump())
+        await crud_token.insert(db, TokenRequest(**payload).model_dump())
 
     @staticmethod
-    async def revoke(db: AsyncSession, user_id: UUID):
+    async def revoke(db: AsyncSession,jti:UUID, user_id: UUID):
         return await crud_token.revoke(db, user_id)
 
 

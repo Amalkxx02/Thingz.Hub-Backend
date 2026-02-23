@@ -6,7 +6,7 @@ from app.crud.token import crud_token
 from app.models.auth import Auth
 from app.schemas.enums import JwtType
 from app.security.hashing import hash_password, verify_password
-from app.security.jwt.token import create_token
+from app.core.security.token import create_token
 from app.utils.datetime_utils import get_current_utc_time, get_future_utc_time
 
 pending_user = {}
@@ -98,8 +98,13 @@ class AuthService:
         }
 
     @staticmethod
-    async def sign_out(db: AsyncSession, user_id: UUID):
-        await crud_token.revoke(db, user_id)
+    async def sign_out(db: AsyncSession, token_info: dict, is_all: bool):
+        jti = token_info["jti"]
+        user_id = token_info["user_id"]
+        if is_all:
+            await crud_token.revoke_all(db, user_id)
+        else:
+            await crud_token.revoke(db, jti, user_id)
 
 
 auth_service = AuthService()
