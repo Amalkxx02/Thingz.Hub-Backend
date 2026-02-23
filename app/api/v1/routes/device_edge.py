@@ -1,37 +1,12 @@
-# """
-# things.py
-# ----------
-# Manages user device "things" APIs (sensors and actuators).
+from uuid import UUID
+from fastapi import APIRouter, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.schemas.device import DeviceRequest
+from app.core.security.dependency import get_current_user
+from app.services.device import device_service
+from app.database.session import get_db
 
-# Endpoints:
-# 1. POST /api/things/{device_id}
-#     - Adds new "things" (sensors/actuators) for a given device.
-#     - Handles batch insert and avoids duplicates using `on_conflict_do_nothing`.
-
-# 2. GET /api/things/{user_id}
-#     - Lists all things for all devices of a given user.
-#     - Returns structured JSON with sensors and actuators grouped per device.
-
-# Notes:
-# - Future:
-#     - Add filtering by thing type.
-#     - Pagination for large device/thing lists.
-#     - Better error messages for empty/malformed input.
-# """
-
-# from fastapi import APIRouter, Depends
-# from sqlalchemy.ext.asyncio import AsyncSession
-# from sqlalchemy.dialects.postgresql import insert
-# from sqlalchemy import select, func
-# from uuid import UUID
-
-# from models.models import Device, Thing
-# from schemas.schemas import ThingAdd, Sensor, Actuator
-# from utils.jwt_utils import verify_access_token
-# from utils.database_utils import get_db, db_execution
-# from utils.thing_utils import device_check
-
-# router = APIRouter(prefix="/api/things", tags=["thing"])
+router = APIRouter()
 
 
 # @router.post("/{device_id}")
