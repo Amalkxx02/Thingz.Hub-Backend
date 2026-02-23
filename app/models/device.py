@@ -36,7 +36,7 @@ class Device(Base):
     revoked = Column(Boolean, default=False)
     active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    last_seen = Column(DateTime(timezone=True), onupdate=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     __table_args__ = (
         UniqueConstraint("user_id", "name", name="unique_device_name_for_each_user"),

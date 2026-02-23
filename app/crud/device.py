@@ -28,10 +28,21 @@ class CRUDDevice:
 
     @staticmethod
     async def get_by_user(db: AsyncSession, user_id: UUID):
-        return await db.scalar(select(Device).where(Device.user_id == user_id))
+        result = await db.execute(select(Device).where(Device.user_id == user_id))
+        return result.scalars().all()
 
     @staticmethod
-    async def revoke(db: AsyncSession, user_id: UUID):
+    async def revoke(db: AsyncSession,device_id:UUID, user_id: UUID):
+        stmt = update(Device).where(Device.id == device_id,Device.user_id == user_id).values(revoked=True)
+        try:
+            await db.execute(stmt)
+            await db.commit()
+        except Exception as e:
+            await db.rollback()
+            raise e
+        
+    @staticmethod
+    async def revoke_all(db: AsyncSession, user_id: UUID):
         stmt = update(Device).where(Device.user_id == user_id).values(revoked=True)
         try:
             await db.execute(stmt)
@@ -42,44 +53,46 @@ class CRUDDevice:
 
     @staticmethod
     async def register(db: AsyncSession, payload: dict):
-        stmt = insert(Device).values(**payload)
+        stmt = insert(Device).values(**payload).returning(Device.id)
         try:
             result = await db.execute(stmt)
             await db.commit()
-            return result
+            return result.scalar_one()
         except Exception as e:
             await db.rollback()
             raise e
-        
-    @staticmethod
-    async def rotate_key(db: AsyncSession, payload: dict,device_id):
-        stmt = update(Device).where(Device.id == device_id).values(**payload)
-        try:
-            result = await db.execute(stmt)
-            await db.commit()
-            return result
-        except Exception as e:
-            await db.rollback()
-            raise e
-        
 
     @staticmethod
-    async def toggle_active(
-        db: AsyncSession, device_id: UUID, user_id: UUID, active: bool
+    async def rotate_key(
+        db: AsyncSession, payload: dict, device_id: UUID, user_id: UUID
     ):
+        stmt = (
+            update(Device)
+            .where(Device.id == device_id, Device.user_id == user_id)
+            .values(**payload)
+        )
+        try:
+            await db.execute(stmt)
+            await db.commit()
+        except Exception as e:
+            await db.rollback()
+            raise e
+
+    @staticmethod
+    async def toggle_active(db: AsyncSession, device_id: UUID, user_id: UUID):
         stmt = (
             update(Device)
             .where(
                 Device.id == device_id,
                 Device.user_id == user_id,
-                Device.active == (not active),
             )
-            .values(active=active)
+            .values(active=~Device.active)
+            .returning(Device.active)
         )
         try:
             result = await db.execute(stmt)
             await db.commit()
-            return result
+            return result.scalar_one()
         except Exception as e:
             await db.rollback()
             raise e
@@ -91,7 +104,6 @@ class CRUDDevice:
         try:
             result = await db.execute(stmt)
             await db.commit()
-            return result
         except Exception as e:
             await db.rollback()
             raise e

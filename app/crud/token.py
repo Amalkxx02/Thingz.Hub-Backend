@@ -20,18 +20,26 @@ class CRUDToken:
         try:
             result = await db.execute(stmt)
             await db.commit()
-            return result
         except Exception as e:
             await db.rollback()
             raise e
 
     @staticmethod
-    async def revoke(db: AsyncSession, user_id: UUID):
+    async def revoke(db: AsyncSession, jti:UUID, user_id: UUID):
+        stmt = update(Token).where(Token.jti == jti,Token.sub == user_id).values(revoked=True)
+        try:
+            await db.execute(stmt)
+            await db.commit()
+        except Exception as e:
+            await db.rollback()
+            raise e
+        
+    @staticmethod
+    async def revoke_all(db: AsyncSession, user_id: UUID):
         stmt = update(Token).where(Token.sub == user_id).values(revoked=True)
         try:
-            result = await db.execute(stmt)
+            await db.execute(stmt)
             await db.commit()
-            return result
         except Exception as e:
             await db.rollback()
             raise e
@@ -39,11 +47,9 @@ class CRUDToken:
     @staticmethod
     async def delete_all(db: AsyncSession, user_id: UUID):
         stmt = delete(Token).where(Token.sub == user_id)
-
         try:
             result = await db.execute(stmt)
             await db.commit()
-            return result
         except Exception as e:
             await db.rollback()
             raise e

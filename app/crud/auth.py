@@ -50,7 +50,6 @@ class CRUDAuth:
 
     @staticmethod
     async def delete(db: AsyncSession, user_id: UUID):
-        """Delete user"""
         stmt = delete(Auth).where(Auth.id == user_id)
         try:
             await db.execute(stmt)
