@@ -14,7 +14,7 @@ async def onboard(
     db: AsyncSession = Depends(get_db),
     user_id:UUID = Depends(get_current_user)  
 ):
-    user = await user_service.onboard(db, onboard.model_dump(),user_id)
+    user = await user_service.onboard(db, onboard,user_id)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

@@ -1,8 +1,9 @@
 from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.schemas.device import DeviceRequest
-from app.core.security.dependency import get_current_user
+from app.database import CacheDB, get_cache_db
+from app.schemas.device import DeviceRequest,EdgeDeviceRequest
+from app.core.security.dependency import get_current_device, get_current_user
 from app.services.device import device_service
 from app.database.session import get_db
 
@@ -76,3 +77,14 @@ async def delete_a_device(
     user_id: UUID = Depends(get_current_user),
 ):
     return await device_service.delete(db, device_id, user_id)
+
+
+
+# ------------------Device Server--------------------#
+@router.post("/verify")
+async def verify_device(
+    device: EdgeDeviceRequest,
+    cache:CacheDB = Depends(get_cache_db),
+    db: AsyncSession = Depends(get_db)
+):
+    return await device_service.verify_device(db,cache,device)

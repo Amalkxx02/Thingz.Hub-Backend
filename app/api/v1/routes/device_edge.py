@@ -1,35 +1,3 @@
-from uuid import UUID
-from fastapi import APIRouter, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
-from app.schemas.device import DeviceRequest
-from app.core.security.dependency import get_current_user
-from app.services.device import device_service
-from app.database.session import get_db
-
-router = APIRouter()
-
-
-# @router.post("/{device_id}")
-# async def add_thing_for_user(
-#     device_id: UUID, thing: ThingAdd, db: AsyncSession = Depends(get_db)
-# ):
-#     """
-#     Add things (sensors/actuators) to a device.
-
-#     Args:
-#         device_id (UUID): UUID of the target device.
-#         thing (ThingAdd): ThingAdd schema containing sensors and actuators.
-#         db (AsyncSession): Async SQLAlchemy session (injected via dependency).
-
-#     Returns:
-#         dict: {"status": "ok"} on success.
-
-#     Raises:
-#         HTTPException:
-#             400 → Device not found
-#             409 → Duplicate thing (already registered)
-#     """
-#     # Validate device existence
 #     await device_check(device_id, db)
 
 #     # Prepare batch insert values

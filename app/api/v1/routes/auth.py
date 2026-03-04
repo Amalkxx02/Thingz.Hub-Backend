@@ -43,7 +43,7 @@ async def verify(token: UUID, db: AsyncSession = Depends(get_db)):
     return HTMLResponse(content=html_content)
 
 
-@router.post("/sign_out/{is_all}", status_code=status.HTTP_200_OK)
+@router.post("/sign_out", status_code=status.HTTP_200_OK)
 async def sign_out(
     is_all:bool,db: AsyncSession = Depends(get_db),token_info:dict = Depends(get_refresh)
 ):

@@ -1,51 +1,44 @@
-# from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-# from sqlalchemy import select, and_
+from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
+from sqlalchemy import select, and_
 
-# from models.models import Thing
-# from app.database import async_session_local
+from app.core.security.dependency import get_current_device
+from app.database.session import get_db
+from app.database import CacheDB,get_cache_db
+from app.models.thing import Thing
+from sqlalchemy.ext.asyncio import AsyncSession
+from uuid import UUID
 
-# from utils.jwt_utils import verify_access_token_ws
-# from utils.thing_utils import device_check
-# from typing import Dict
-# from uuid import UUID
-# import json
+router = APIRouter(prefix="/ws", tags=["websocket"])
 
-# router = APIRouter(prefix="/ws", tags=["websocket"])
-
-# connected_client: Dict[UUID, WebSocket] = {}
-# connected_devices: Dict[UUID, WebSocket] = {}
-# thing: Dict[str, int] = {}
+connected_client: dict[UUID, WebSocket] = {}
+connected_devices: dict[UUID, WebSocket] = {}
+thing: dict[str, int] = {}
 
 
-# @router.websocket("/client")
-# async def data_handle_client(jwt_key:bytes,ws: WebSocket):
+@router.websocket("/client")
+async def data_handle_client(jwt_key:bytes,ws: WebSocket,cache:CacheDB = Depends(get_cache_db)):
     
-#     user_id = UUID(verify_access_token_ws(jwt_key))
+    user_id = UUID(verify_access_token_ws(jwt_key))
 
-#     if user_id is None:
-#         await ws.close()  # status_code=404, detail="The user does not exist. It is a illegal move"
-#         return
+    if user_id is None:
+        await ws.close()  # status_code=404, detail="The user does not exist. It is a illegal move"
+        return
 
-#     await ws.accept()
-#     connected_client[user_id] = ws
+    await ws.accept()
+    cache.set[user_id] = ws
 
-#     try:
-#         while True:
-#             thing_data = await connected_client[user_id].receive_json()
+    try:
+        while True:
+            thing_data = await connected_client[user_id].receive_json()
 
-#     except WebSocketDisconnect:
-#         print("client disconnect")
-#         connected_client.pop(user_id, None)
+    except WebSocketDisconnect:
+        print("client disconnect")
+        connected_client.pop(user_id, None)
 
 
-# @router.websocket("/device/{device_id}")
-# async def data_handle_thing(device_id: UUID, ws: WebSocket):
-#     async with async_session_local() as db:
-#         device = await device_check(device_id, db)
-#         if device is None:
-#             await ws.close()  # status_code=400, detail="The Device does not exist"
-#             return
-
+@router.websocket("/device/{device_id}")
+async def data_handle_thing(ws:WebSocket,device_id: UUID = Depends(get_current_device),db: AsyncSession = Depends(get_db)):
+    
 #     user_id = device.user_id
 #     print(type(user_id))
 #     await ws.accept()

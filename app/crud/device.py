@@ -12,7 +12,7 @@ class CRUDDevice:
             select(Device).where(
                 Device.hashed_key == api_key,
                 Device.revoked == False,
-                Device.active == True,
+                Device.is_active == True,
             )
         )
 
@@ -23,8 +23,10 @@ class CRUDDevice:
         )
 
     @staticmethod
-    async def get_by_id(db: AsyncSession, device_id: UUID):
-        return await db.scalar(select(Device).where(Device.id == device_id))
+    async def get_by_id(db: AsyncSession, device_id: UUID, user_id: UUID):
+        return await db.scalar(
+            select(Device).where(Device.id == device_id, Device.user_id == user_id)
+        )
 
     @staticmethod
     async def get_by_user(db: AsyncSession, user_id: UUID):
@@ -32,15 +34,25 @@ class CRUDDevice:
         return result.scalars().all()
 
     @staticmethod
-    async def revoke(db: AsyncSession,device_id:UUID, user_id: UUID):
-        stmt = update(Device).where(Device.id == device_id,Device.user_id == user_id).values(revoked=True)
+    async def get_only_by_device_id(db: AsyncSession, device_id: UUID):
+        return await db.scalar(
+            select(Device).where(Device.id == device_id)
+        )
+    
+    @staticmethod
+    async def revoke(db: AsyncSession, device_id: UUID, user_id: UUID):
+        stmt = (
+            update(Device)
+            .where(Device.id == device_id, Device.user_id == user_id)
+            .values(revoked=True)
+        )
         try:
             await db.execute(stmt)
             await db.commit()
         except Exception as e:
             await db.rollback()
             raise e
-        
+
     @staticmethod
     async def revoke_all(db: AsyncSession, user_id: UUID):
         stmt = update(Device).where(Device.user_id == user_id).values(revoked=True)
@@ -86,8 +98,8 @@ class CRUDDevice:
                 Device.id == device_id,
                 Device.user_id == user_id,
             )
-            .values(active=~Device.active)
-            .returning(Device.active)
+            .values(is_active=~Device.is_active)
+            .returning(Device.is_active)
         )
         try:
             result = await db.execute(stmt)

@@ -1,6 +1,7 @@
 from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.crud.user import crud_user
+from app.schemas.user import Onboard
 from app.services.auth import auth_service
 
 pending_user = {}
@@ -19,8 +20,8 @@ class UserService:
         return await crud_user.get_by_email(db, email)
 
     @staticmethod
-    async def onboard(db: AsyncSession, payload: dict, user_id: UUID):
-
+    async def onboard(db: AsyncSession, onboard: Onboard, user_id: UUID):
+        payload = onboard.model_dump()
         user = await crud_user.get_user(db, user_id)
         if user:
             raise ValueError("User already onboarded")
@@ -30,6 +31,8 @@ class UserService:
             raise ValueError("User not verified")
 
         payload["user_id"] = user_id
+        payload["profile_image_url"] = str(onboard.profile_image_url)
+        payload["email"] = auth.email
 
         return await crud_user.onboard(db, payload)
 

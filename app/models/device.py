@@ -3,6 +3,7 @@ from sqlalchemy import (
     Column,
     DateTime,
     ForeignKey,
+    Integer,
     LargeBinary,
     String,
     UniqueConstraint,
@@ -31,10 +32,14 @@ class Device(Base):
         index=True,
     )
     name = Column(String, nullable=False)
+    type = Column(Integer, nullable=False)
+
     hashed_key = Column(LargeBinary, nullable=False, index=True)
-    key_hint = Column(String(4), nullable=False)
+    key_hint = Column(String, nullable=False)
+
     revoked = Column(Boolean, default=False)
-    active = Column(Boolean, default=True)
+    is_active = Column(Boolean, default=True)
+
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 

@@ -1,34 +1,54 @@
 from sqlalchemy import (
-    CheckConstraint,
+    Boolean,
     Column,
+    DateTime,
     ForeignKey,
     Integer,
     String,
     UniqueConstraint,
 )
 from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.sql import func
+from sqlalchemy.dialects.postgresql import JSONB, UUID
+import uuid
 
 from app.database.base import Base
 
 
 class Thing(Base):
-    __tablename__ = "Things"
-    thing_id = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
+    __tablename__ = "Thingz"
+    id = Column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+        nullable=False,
+        index=True,
+    )
     device_id = Column(
         UUID(as_uuid=True),
-        ForeignKey("Devices.device_id", ondelete="CASCADE"),
+        ForeignKey("Devices.id", ondelete="CASCADE"),
         nullable=False,
+        index=True,
     )
-    thing_type = Column(String, nullable=False)
-    thing_name = Column(String, nullable=False)
+    thing_type = Column(Integer, nullable=False)
+    data_type = Column(Integer, nullable=False)
 
-    device = relationship("Device", back_populates="things")
-    thing_card = relationship("ThingCard", back_populates="thing")
+    name = Column(String, nullable=True)
+    unit = Column(String, nullable=True)
+
+    slug = Column(String, nullable=False)
+    hardware_address = Column(String, nullable=True, server_default="0")
+
+    is_active = Column(Boolean, default=True)
+    
+    meta = Column(JSONB, server_default='{}')
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     __table_args__ = (
-        UniqueConstraint("device_id", "thing_name", name="unique_device_id_thing_name"),
-        CheckConstraint(
-            thing_type.in_(["sensor", "actuator"]), name="allow_sensor_or_actuator"
-        ),
+        UniqueConstraint("device_id", "hardware_address", "slug", name="unique_device_id_hardware_address_slug"),
     )
+
+    # device = relationship("Device", back_populates="things")
+    # thing_card = relationship("ThingCard", back_populates="thing")
