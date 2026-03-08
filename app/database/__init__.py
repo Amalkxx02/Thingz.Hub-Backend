@@ -1,22 +1,20 @@
 import multiprocessing
 from uuid import UUID
 
-from fastapi import WebSocket
-
 manager = multiprocessing.Manager()
 
 global _cache_db
-_device_db: dict[UUID, str|WebSocket] = manager.dict()
+_device_db: dict[UUID, str] = manager.dict()
 
 class CacheDB:
     def __init__(self) -> None:
         self._cache_db = _device_db
         self._lock = manager.Lock()
 
-    def get(self, id: UUID) -> str | WebSocket | None:
+    def get(self, id: UUID) -> str | None:
         return self._cache_db.get(id)
 
-    def set(self, id: UUID, value: str | WebSocket) -> None:
+    def set(self, id: UUID, value: str) -> None:
         with self._lock:
             self._cache_db[id] = value
 
@@ -24,7 +22,7 @@ class CacheDB:
         with self._lock:
             self._cache_db.pop(id)
 
-    def all(self) -> dict[UUID, str | WebSocket]:
+    def all(self) -> dict[UUID, str]:
         return self._cache_db
 
 db = CacheDB()

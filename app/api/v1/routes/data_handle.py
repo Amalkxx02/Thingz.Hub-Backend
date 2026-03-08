@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 from sqlalchemy import select, and_
 
-from app.core.security.dependency import get_current_device
+from app.core.security.dependency import get_current_device, get_current_user
 from app.database.session import get_db
 from app.database import CacheDB,get_cache_db
 from app.models.thing import Thing
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 
-router = APIRouter(prefix="/ws", tags=["websocket"])
+router = APIRouter()
 
 connected_client: dict[UUID, WebSocket] = {}
 connected_devices: dict[UUID, WebSocket] = {}
@@ -16,16 +16,12 @@ thing: dict[str, int] = {}
 
 
 @router.websocket("/client")
-async def data_handle_client(jwt_key:bytes,ws: WebSocket,cache:CacheDB = Depends(get_cache_db)):
-    
-    user_id = UUID(verify_access_token_ws(jwt_key))
+async def data_handle_client(ws: WebSocket,jwt_key:str):
 
-    if user_id is None:
-        await ws.close()  # status_code=404, detail="The user does not exist. It is a illegal move"
-        return
-
+    user_id = await get_current_user(jwt_key)
     await ws.accept()
-    cache.set[user_id] = ws
+
+    connected_client[user_id] = ws
 
     try:
         while True:
@@ -36,9 +32,9 @@ async def data_handle_client(jwt_key:bytes,ws: WebSocket,cache:CacheDB = Depends
         connected_client.pop(user_id, None)
 
 
-@router.websocket("/device/{device_id}")
+@router.websocket("/device")
 async def data_handle_thing(ws:WebSocket,device_id: UUID = Depends(get_current_device),db: AsyncSession = Depends(get_db)):
-    
+    pass
 #     user_id = device.user_id
 #     print(type(user_id))
 #     await ws.accept()
