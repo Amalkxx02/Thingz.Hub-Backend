@@ -2,15 +2,17 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.schemas.auth import AuthIn
+from app.schemas.auth import AuthIn, VerificationResponse
+from app.schemas.response import MessageResponse
 from app.core.security.dependency import get_refresh
+from app.schemas.token import TokenResponse
 from app.services.auth import auth_service
 from app.database.session import get_db
 
 router = APIRouter()
 
 
-@router.post("/sign_up", status_code=status.HTTP_201_CREATED)
+@router.post("/sign_up", status_code=status.HTTP_201_CREATED, response_model=MessageResponse)
 async def sign_up(
     user_in: AuthIn,
     db: AsyncSession = Depends(get_db),
@@ -18,7 +20,7 @@ async def sign_up(
     return await auth_service.register(db, user_in.model_dump())
 
 
-@router.post("/sign_in", status_code=status.HTTP_200_OK)
+@router.post("/sign_in", status_code=status.HTTP_200_OK, response_model=TokenResponse)
 async def sign_in(user_in: AuthIn, db: AsyncSession = Depends(get_db)):
     return await auth_service.authenticate(db, user_in.model_dump())
 
@@ -43,13 +45,13 @@ async def verify(token: UUID, db: AsyncSession = Depends(get_db)):
     return HTMLResponse(content=html_content)
 
 
-@router.post("/sign_out", status_code=status.HTTP_200_OK)
+@router.post("/sign_out", status_code=status.HTTP_200_OK, response_model=MessageResponse)
 async def sign_out(
-    is_all:bool,db: AsyncSession = Depends(get_db),token_info:dict = Depends(get_refresh)
+    is_all: bool, db: AsyncSession = Depends(get_db), token_info: dict = Depends(get_refresh)
 ):
-    await auth_service.sign_out(db,token_info,is_all)
+    return await auth_service.sign_out(db, token_info, is_all)
 
 
-@router.get("/refresh", status_code=status.HTTP_200_OK)
+@router.get("/refresh", status_code=status.HTTP_200_OK, response_model=TokenResponse)
 async def refresh_token(token_info: dict = Depends(get_refresh)):
-    return token_info["token"]
+    return TokenResponse(refresh_token=token_info["token"])

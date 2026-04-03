@@ -1,10 +1,15 @@
 from uuid import UUID, uuid4
-from fastapi import HTTPException
+from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.crud.auth import crud_auth
 from app.crud.token import crud_token
+from app.crud.user import crud_user
 from app.models.auth import Auth
+# from app.schemas.auth import VerificationResponse
+from app.models.user import User
 from app.schemas.enums import JwtType
+from app.schemas.response import MessageResponse
+from app.schemas.token import TokenResponse
 from app.security.hashing import hash_password, verify_password
 from app.core.security.token import create_token
 from app.utils.datetime_utils import get_current_utc_time, get_future_utc_time
@@ -32,15 +37,15 @@ class AuthService:
 
         if user:
             if user.verified:
-                return {
-                    "status": "error",
-                    "message": "User is already verified. Please login.",
-                }
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Email already registered and verified. Please login.",
+                )
             else:
-                return {
-                    "status": "pending",
-                    "message": "Email already registered but not verified. Check your inbox.",
-                }
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Email already registered but not verified. Check your inbox.",
+                )
 
         password = hash_password(payload["password"])
         payload["password"] = password
@@ -54,9 +59,9 @@ class AuthService:
             "expires_at": expires_at,
         }
 
-        verification_link = f"Verification link: http://127.0.0.1:8000/api/v1/auths/verify?token={token}"
-
-        return verification_link
+        verification_link = f"http://127.0.0.1:8000/api/v1/auths/verify?token={token}"
+        print(verification_link)
+        return MessageResponse(message="Verification link sent to your email.")
 
     @staticmethod
     async def verify(db: AsyncSession, token: UUID):
@@ -79,32 +84,40 @@ class AuthService:
     @staticmethod
     async def authenticate(db: AsyncSession, payload: dict):
 
-        user: Auth = await crud_auth.get_by_email(db, payload["email"])
+        auth_user: Auth = await crud_auth.get_by_email(db, payload["email"])
+        if not auth_user or not verify_password(payload["password"], auth_user.password):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid email or password.",
+            )
 
-        if not user or not verify_password(payload["password"], user.password):
-            return {"status": "error", "message": "Invalid email or password."}
-
-        if not user.verified:
-            return {
-                "status": "pending",
-                "message": "Your account is not verified. Please check your email for the link.",
-            }
-
-        data = {"email": user.email, "sub": str(user.id)}
-        return {
-            "status": "success",
-            "access": await create_token(db, data),
-            "refresh": await create_token(db, data, JwtType.REFRESH),
-        }
+        if not auth_user.verified:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Account not verified. Please check your email for the verification link.",
+            )
+        user:User = await crud_user.get_user(db, auth_user.id)
+        if user:
+            onboarded = user.is_onboarded
+        else:
+            onboarded = False
+        data = {"email": auth_user.email, "sub": str(auth_user.id)}
+        return TokenResponse(
+            is_onboarded=onboarded,
+            access_token=await create_token(JwtType.ACCESS, data),
+            refresh_token=await create_token(JwtType.REFRESH, data),
+        )
 
     @staticmethod
-    async def sign_out(db: AsyncSession, token_info: dict, is_all: bool):
+    async def sign_out(db: AsyncSession, token_info: dict, is_all: bool) -> MessageResponse:
         jti = token_info["jti"]
         user_id = token_info["user_id"]
         if is_all:
             await crud_token.revoke_all(db, user_id)
+            return MessageResponse(message="All sessions signed out successfully.")
         else:
             await crud_token.revoke(db, jti, user_id)
+            return MessageResponse(message="Signed out successfully.")
 
 
 auth_service = AuthService()

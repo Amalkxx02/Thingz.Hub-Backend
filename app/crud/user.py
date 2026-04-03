@@ -18,11 +18,11 @@ class CRUDUser:
 
     @staticmethod
     async def onboard(db: AsyncSession, payload: dict):
-        stmt = insert(User).values(**payload)
+        stmt = insert(User).values(**payload).returning(User)
         try:
             result = await db.execute(stmt)
             await db.commit()
-            return result
+            return result.scalar_one()
         except Exception as e:
             await db.rollback()
             raise e

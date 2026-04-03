@@ -44,7 +44,7 @@ class CRUDDevice:
         stmt = (
             update(Device)
             .where(Device.id == device_id, Device.user_id == user_id)
-            .values(revoked=True)
+            .values(revoked=True, is_active=False)
         )
         try:
             await db.execute(stmt)

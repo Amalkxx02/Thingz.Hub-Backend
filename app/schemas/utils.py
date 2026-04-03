@@ -1,3 +1,4 @@
+from fastapi import HTTPException, status
 import re
 
 from pydantic import EmailStr
@@ -13,7 +14,16 @@ def is_strong_password(password: str):
     )
     if re.search(pattern, password):
         return password
-    raise ValueError("Password is not strong")
+    raise HTTPException(
+        status_code=400,
+        detail=(
+            "Password must be at least 8 characters long, "
+            "contain uppercase and lowercase letters, "
+            "a number, and a special character."
+        ),
+    )
+
+
 
 
 def is_empty(value: str):
