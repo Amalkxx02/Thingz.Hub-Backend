@@ -1,9 +1,17 @@
 from fastapi import HTTPException, status
+from pydatic import StringConstraints
+from typing import Annotated
 import re
 
 from pydantic import EmailStr
 
-
+StrongPassword = Annotated[
+    str,
+    StringConstants(
+        min_length=8
+        pattern=r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
+    )
+]
 def is_strong_password(password: str):
     pattern = (
         r"^(?=.*[a-z])"
