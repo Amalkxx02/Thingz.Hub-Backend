@@ -1,11 +1,11 @@
 from pydantic import BaseModel, EmailStr, AfterValidator, HttpUrl
 from typing import Annotated
 
-from .utils import email_formalize, is_strong_password, StrongPassword
+from .utils import Email,StrongPassword
 
 
 class AuthIn(BaseModel):
-    email: Annotated[EmailStr, AfterValidator(email_formalize)]
+    email: Email
     password: StrongPassword
 
 class VerificationResponse(BaseModel):

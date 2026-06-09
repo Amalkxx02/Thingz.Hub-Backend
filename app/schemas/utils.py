@@ -1,38 +1,35 @@
 from fastapi import HTTPException, status
-from pydatic import StringConstraints
+from pydantic import StringConstraints,Field
 from typing import Annotated
 import re
 
-from pydantic import EmailStr,AfterValidator
+from pydantic import EmailStr, AfterValidator
+
 
 def is_strong_password(password: str):
-    pattern = (
-        r"^(?=.*[a-z])"
-        r"(?=.*[A-Z])"
-        r"(?=.*\d)"
-        r"(?=.*[@$!%*?&_#-])"
-        r"[A-Za-z\d@$!%*?&_#-]{8,}$"
+    STRONG_PASSWORD_REGEX = re.compile(
+        r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&_#-]).+$"
     )
-    if re.search(pattern, password):
-        return password
-    raise HTTPException(
-        status_code=400,
-        detail=(
+    if not STRONG_PASSWORD_REGEX.match(password):
+        raise ValueError(
             "Password must be at least 8 characters long, "
             "contain uppercase and lowercase letters, "
             "a number, and a special character."
-        ),
-    )
-    
+        )
+    return password
+
+
 StrongPassword = Annotated[
     str,
-    StringConstants(
+    StringConstraints(
         strip_whitespace=True,
         min_length=8,
         max_length=128,
     ),
-        AfterValidator(is_strong_password)
+    AfterValidator(is_strong_password),
+    Field(examples=["Password@123"])
 ]
+
 
 def is_empty(value: str):
     value = value.strip()
@@ -52,6 +49,5 @@ def is_list_not_empty_and_duplicate(value: list, thing: str):
 
     return value
 
-Email = Annotated[EmailStr,StringConstants(strip_whitespace=True,to_lower=True)]
-# def email_formalize(email: EmailStr) -> EmailStr:
-#     return email.lower()
+
+Email = Annotated[EmailStr, StringConstraints(strip_whitespace=True, to_lower=True)]
