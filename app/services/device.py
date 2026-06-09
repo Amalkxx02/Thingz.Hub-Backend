@@ -77,7 +77,7 @@ async def toggle_device(
     db: AsyncSession, device_id: UUID, user_id: UUID
 ) -> DeviceToggleResponse:
     is_active = await crud_device.toggle_active(db, device_id, user_id)
-    if await device_service.revoke_status(db, device_id, user_id):
+    if await revoke_status(db, device_id, user_id):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Device is revoked. Please contact support.",
@@ -104,7 +104,7 @@ async def verify_device(
 ) -> DeviceVerifyResponse:
 
     device_id_from_edge = to_uuid_4_by_str(device.id)
-    device_id_from_db = await device_service.verify_api_key(db, device.key)
+    device_id_from_db = await verify_api_key(db, device.key)
 
     if not device_id_from_db:
         return DeviceVerifyResponse(verified=False)
