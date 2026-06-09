@@ -14,7 +14,7 @@ from app.utils.security import to_uuid_4_by_str
 from .token import create_token, decode_token
 from .oauth import get_current_token
 
-from app.services.token import token_service
+from app.services import token as token_service
 
 
 from app.core.exceptions import INVALID_CREDENTIALS, INVALID_TOKEN, TOKEN_EXPIRED

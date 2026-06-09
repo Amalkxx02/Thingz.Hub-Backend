@@ -6,7 +6,7 @@ from app.schemas.auth import AuthIn, VerificationResponse
 from app.schemas.response import MessageResponse
 from app.core.security.dependency import get_refresh
 from app.schemas.token import TokenResponse
-from app.services.auth import auth_service
+from app.services import auth as auth_service
 from app.database.session import get_db
 
 router = APIRouter()

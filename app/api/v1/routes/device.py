@@ -12,7 +12,7 @@ from app.schemas.device import (
 )
 from app.schemas.response import MessageResponse
 from app.core.security.dependency import get_current_device, get_current_user
-from app.services.device import device_service
+from app.services import device as device_service
 from app.database.session import get_db
 
 router = APIRouter()

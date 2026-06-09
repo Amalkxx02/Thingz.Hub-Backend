@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.schemas.enums import JwtType
-from app.services.token import token_service
+from app.services import token as token_service
 from app.utils.datetime_utils import get_current_utc_time, get_future_utc_time
 
 
