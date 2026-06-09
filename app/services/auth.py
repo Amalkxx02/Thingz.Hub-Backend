@@ -54,7 +54,7 @@ async def register(db: AsyncSession, payload: dict) -> str:
     password = hash_password(payload["password"])
     payload["password"] = password
 
-    await crud_auth.insert(db, payload)
+    await crud_auth.insert_auth(db, payload)
 
     token = uuid4()
     expires_at = get_future_utc_time(minutes=10)
