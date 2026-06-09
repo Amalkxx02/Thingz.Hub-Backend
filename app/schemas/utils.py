@@ -3,15 +3,8 @@ from pydatic import StringConstraints
 from typing import Annotated
 import re
 
-from pydantic import EmailStr
+from pydantic import EmailStr,AfterValidator
 
-StrongPassword = Annotated[
-    str,
-    StringConstants(
-        min_length=8
-        pattern=r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
-    )
-]
 def is_strong_password(password: str):
     pattern = (
         r"^(?=.*[a-z])"
@@ -30,9 +23,16 @@ def is_strong_password(password: str):
             "a number, and a special character."
         ),
     )
-
-
-
+    
+StrongPassword = Annotated[
+    str,
+    StringConstants(
+        strip_whitespace=True,
+        min_length=8,
+        max_length=128,
+    ),
+        AfterValidator(is_strong_password)
+]
 
 def is_empty(value: str):
     value = value.strip()
@@ -52,6 +52,6 @@ def is_list_not_empty_and_duplicate(value: list, thing: str):
 
     return value
 
-
-def email_formalize(email: EmailStr) -> EmailStr:
-    return email.lower()
+Email = Annotated[EmailStr,StringConstants(strip_whitespace=True,to_lower=True)]
+# def email_formalize(email: EmailStr) -> EmailStr:
+#     return email.lower()
