@@ -6,7 +6,6 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-
 # ──────────────────── DB Insert Schema ──────────────────── #
 
 
@@ -44,6 +43,7 @@ class TokenDB(BaseModel):
 
 class TokenResponse(BaseModel):
     """Returned after sign-in and token refresh."""
+
     is_onboarded: bool = False
     access_token: str | None = None
     refresh_token: str

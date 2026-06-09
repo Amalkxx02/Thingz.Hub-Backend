@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status
-from pydantic import StringConstraints,Field
+from pydantic import StringConstraints, Field
 from typing import Annotated
 import re
 
@@ -27,7 +27,7 @@ StrongPassword = Annotated[
         max_length=128,
     ),
     AfterValidator(is_strong_password),
-    Field(examples=["Password@123"])
+    Field(examples=["Password@123"]),
 ]
 
 

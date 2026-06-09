@@ -39,13 +39,13 @@ async def get_current_user(token: str = Depends(get_current_token)) -> UUID:
 
 
 async def get_current_device(
-    x_device_id:UUID = Header(...),
+    x_device_id: UUID = Header(...),
     x_device_token: str = Header(...),
-    cache: CacheDB = Depends(get_cache_db)
+    cache: CacheDB = Depends(get_cache_db),
 ):
     if not cache.get(x_device_id) == x_device_token:
         raise INVALID_CREDENTIALS
-    
+
     return x_device_id
 
 

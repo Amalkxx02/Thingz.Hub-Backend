@@ -2,6 +2,7 @@ import bcrypt
 import hashlib
 import secrets
 
+
 def hash_password(pwd: str) -> bytes:
     return bcrypt.hashpw(pwd.encode(), bcrypt.gensalt())
 

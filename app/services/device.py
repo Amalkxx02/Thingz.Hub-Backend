@@ -17,18 +17,20 @@ from app.security.hashing import get_fingerprint
 from app.utils.security import generate_secure_string, to_uuid_4_by_str
 
 
-
 async def get(db: AsyncSession, device_id: UUID, user_id: UUID) -> DeviceResponse:
     device = await crud_device.get_by_id(db, device_id, user_id)
     return DeviceResponse.model_validate(device)
+
 
 async def get_all(db: AsyncSession, user_id: UUID) -> list[DeviceResponse]:
     devices = await crud_device.get_by_user(db, user_id)
     return [DeviceResponse.model_validate(d) for d in devices]
 
+
 async def revoke_status(db: AsyncSession, device_id: UUID, user_id: UUID) -> bool:
     device = await crud_device.get_by_id(db, device_id, user_id)
     return device.revoked
+
 
 async def register(
     db: AsyncSession, payload: dict, user_id: UUID
@@ -41,6 +43,7 @@ async def register(
     )
     device_id = await crud_device.register(db, payload)
     return DeviceRegisterResponse(device_id=device_id, api_key=api_key)
+
 
 async def rotate_key(
     db: AsyncSession, device_id: UUID, user_id: UUID
@@ -58,6 +61,7 @@ async def rotate_key(
     await crud_device.rotate_key(db, payload, device_id, user_id)
     return DeviceRegisterResponse(device_id=device_id, api_key=api_key)
 
+
 async def revoke_key(
     db: AsyncSession, user_id: UUID, device_id: UUID = None
 ) -> MessageResponse:
@@ -67,6 +71,7 @@ async def revoke_key(
     else:
         await crud_device.revoke_all(db, user_id)
         return MessageResponse(message="All devices revoked successfully.")
+
 
 async def toggle_device(
     db: AsyncSession, device_id: UUID, user_id: UUID
@@ -79,11 +84,11 @@ async def toggle_device(
         )
     return DeviceToggleResponse(is_active=is_active)
 
-async def delete(
-    db: AsyncSession, device_id: UUID, user_id: UUID
-) -> MessageResponse:
+
+async def delete(db: AsyncSession, device_id: UUID, user_id: UUID) -> MessageResponse:
     await crud_device.delete(db, device_id)
     return MessageResponse(message="Device deleted successfully.")
+
 
 # -------------------------------------------------------------- #
 async def verify_api_key(db: AsyncSession, api_key: str):
@@ -92,6 +97,7 @@ async def verify_api_key(db: AsyncSession, api_key: str):
     if not result:
         return False
     return result.id
+
 
 async def verify_device(
     db: AsyncSession, cache: CacheDB, device: EdgeDeviceRequest

@@ -1,4 +1,4 @@
-from fastapi import HTTPException,status
+from fastapi import HTTPException, status
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import delete, select, update
@@ -11,12 +11,13 @@ from uuid import UUID
 from app.schemas.thing import UpdateThingRequest
 
 
-
 async def add_thingz(db: AsyncSession, payload: list):
     stmt = (
         insert(Thing)
         .values(payload)
-        .on_conflict_do_nothing(index_elements=["device_id", "hardware_address", "slug"])
+        .on_conflict_do_nothing(
+            index_elements=["device_id", "hardware_address", "slug"]
+        )
     )
     try:
         await db.execute(stmt)
@@ -24,6 +25,7 @@ async def add_thingz(db: AsyncSession, payload: list):
     except Exception as e:
         await db.rollback()
         raise e
+
 
 async def device_thingz(db: AsyncSession, device_id: UUID, user_id: UUID):
     result = await db.execute(
@@ -33,6 +35,7 @@ async def device_thingz(db: AsyncSession, device_id: UUID, user_id: UUID):
     )
     return result.scalars().all()
 
+
 async def user_thingz(db: AsyncSession, user_id: UUID):
     result = await db.execute(
         select(Thing).where(
@@ -41,9 +44,8 @@ async def user_thingz(db: AsyncSession, user_id: UUID):
     )
     return result.scalars().all()
 
-async def update_thing(
-    db: AsyncSession, thing_id: UUID, user_id: UUID, payload: dict
-):
+
+async def update_thing(db: AsyncSession, thing_id: UUID, user_id: UUID, payload: dict):
     stmt = (
         update(Thing)
         .where(
@@ -51,7 +53,7 @@ async def update_thing(
             Thing.device_id.in_(select(Device.id).where(Device.user_id == user_id)),
         )
         .values(**payload)
-        .returning(Thing.name,Thing.unit)
+        .returning(Thing.name, Thing.unit)
     )
     try:
         result = await db.execute(stmt)
@@ -66,6 +68,7 @@ async def update_thing(
     except Exception:
         await db.rollback()
         raise
+
 
 async def toggle_active(db: AsyncSession, thing_id: UUID, user_id: UUID):
     stmt = (
@@ -85,10 +88,12 @@ async def toggle_active(db: AsyncSession, thing_id: UUID, user_id: UUID):
         await db.rollback()
         raise e
 
-async def delete(db: AsyncSession, thing_id: UUID,user_id: UUID):
+
+async def delete(db: AsyncSession, thing_id: UUID, user_id: UUID):
     stmt = delete(Thing).where(
         Thing.id == thing_id,
-        Thing.device_id.in_(select(Device.id).where(Device.user_id == user_id)))
+        Thing.device_id.in_(select(Device.id).where(Device.user_id == user_id)),
+    )
     try:
         result = await db.execute(stmt)
         await db.commit()
@@ -96,5 +101,3 @@ async def delete(db: AsyncSession, thing_id: UUID,user_id: UUID):
     except Exception as e:
         await db.rollback()
         raise e
-
-

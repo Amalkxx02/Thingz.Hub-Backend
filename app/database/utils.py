@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
+
 async def db_execution(db: AsyncSession, stmt):
     try:
         await db.execute(stmt)

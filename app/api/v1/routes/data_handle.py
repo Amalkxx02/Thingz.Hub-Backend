@@ -3,7 +3,7 @@ from sqlalchemy import select, and_
 
 from app.core.security.dependency import get_current_device, get_current_user
 from app.database.session import get_db
-from app.database import CacheDB,get_cache_db
+from app.database import CacheDB, get_cache_db
 from app.models.thing import Thing
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
@@ -16,7 +16,7 @@ thing: dict[str, int] = {}
 
 
 @router.websocket("/client")
-async def data_handle_client(ws: WebSocket,jwt_key:str):
+async def data_handle_client(ws: WebSocket, jwt_key: str):
 
     user_id = await get_current_user(jwt_key)
     await ws.accept()
@@ -33,8 +33,14 @@ async def data_handle_client(ws: WebSocket,jwt_key:str):
 
 
 @router.websocket("/device")
-async def data_handle_thing(ws:WebSocket,device_id: UUID = Depends(get_current_device),db: AsyncSession = Depends(get_db)):
+async def data_handle_thing(
+    ws: WebSocket,
+    device_id: UUID = Depends(get_current_device),
+    db: AsyncSession = Depends(get_db),
+):
     pass
+
+
 #     user_id = device.user_id
 #     print(type(user_id))
 #     await ws.accept()
@@ -43,7 +49,7 @@ async def data_handle_thing(ws:WebSocket,device_id: UUID = Depends(get_current_d
 #     try:
 #         while True:
 #             row_data = await connected_devices[device_id].receive_text()
-            
+
 
 #             if user_id in connected_client:
 
@@ -71,7 +77,7 @@ async def data_handle_thing(ws:WebSocket,device_id: UUID = Depends(get_current_d
 #                             thing_id = thing[thing_crypt]
 
 #                         thing_payload = {str(thing_id): value}
-                
+
 
 #                 await connected_client[user_id].send_json(thing_payload)
 

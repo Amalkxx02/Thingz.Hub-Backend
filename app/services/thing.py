@@ -18,24 +18,29 @@ from app.crud import thing as crud_thing
 async def registration(
     db: AsyncSession, device_id: UUID, thingz: list[EdgeThingzRequest]
 ) -> MessageResponse:
-    payload = [
-        {**thing.model_dump(), "device_id": device_id}
-        for thing in thingz
-    ]
+    payload = [{**thing.model_dump(), "device_id": device_id} for thing in thingz]
     await crud_thing.add_thingz(db, payload)
     return MessageResponse(message="Things registered successfully.")
 
-async def device_thing(db: AsyncSession, device_id: UUID, user_id: UUID) -> list[ThingResponse]:
+
+async def device_thing(
+    db: AsyncSession, device_id: UUID, user_id: UUID
+) -> list[ThingResponse]:
     things = await crud_thing.device_thingz(db, device_id, user_id)
     return [ThingResponse.model_validate(t) for t in things]
+
 
 async def user_thing(db: AsyncSession, user_id: UUID) -> list[ThingResponse]:
     things = await crud_thing.user_thingz(db, user_id)
     return [ThingResponse.model_validate(t) for t in things]
 
-async def toggle_thing(db: AsyncSession, thing_id: UUID, user_id: UUID) -> ThingToggleResponse:
+
+async def toggle_thing(
+    db: AsyncSession, thing_id: UUID, user_id: UUID
+) -> ThingToggleResponse:
     is_active = await crud_thing.toggle_active(db, thing_id, user_id)
     return ThingToggleResponse(is_active=is_active)
+
 
 async def update(
     db: AsyncSession, thing_id: UUID, user_id: UUID, thing: UpdateThingRequest
@@ -43,6 +48,7 @@ async def update(
     payload = thing.model_dump(exclude_none=True)
     result = await crud_thing.update_thing(db, thing_id, user_id, payload)
     return ThingUpdateResponse(name=result.name, unit=result.unit)
+
 
 async def delete(db: AsyncSession, thing_id: UUID, user_id: UUID) -> MessageResponse:
     await crud_thing.delete(db, thing_id, user_id)

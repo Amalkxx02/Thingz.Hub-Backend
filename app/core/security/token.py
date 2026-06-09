@@ -7,7 +7,6 @@ from app.schemas.enums import JwtType
 from app.services import token as token_service
 from app.utils.datetime_utils import get_current_utc_time, get_future_utc_time
 
-
 JWT_CONFIG = {
     JwtType.REFRESH: (settings.JWT_ACCESS_KEY, settings.JWT_ACCESS_TTL, "minutes"),
     JwtType.ACCESS: (settings.JWT_REFRESH_KEY, settings.JWT_REFRESH_TTL, "days"),

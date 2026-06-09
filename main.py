@@ -1,4 +1,5 @@
 """FastAPI Application Factory"""
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
@@ -13,12 +14,13 @@ async def lifespan(app: FastAPI):
     await init_db()
     yield
 
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
     description=settings.DESCRIPTION,
     version=settings.PROJECT_VERSION,
     debug=settings.DEBUG,
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # Add CORS middleware
@@ -35,16 +37,14 @@ setup_exception_handlers(app)
 # Include API routers
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
-@app.get("/",include_in_schema=False)
+
+@app.get("/", include_in_schema=False)
 async def root():
     """Root endpoint"""
-    return {
-        "message": "Welcome to FastAPI",
-        "version": settings.PROJECT_VERSION
-    }
+    return {"message": "Welcome to FastAPI", "version": settings.PROJECT_VERSION}
 
-@app.get("/health",include_in_schema=False)
+
+@app.get("/health", include_in_schema=False)
 async def health_check():
     """Health check endpoint"""
     return {"status": "healthy"}
-

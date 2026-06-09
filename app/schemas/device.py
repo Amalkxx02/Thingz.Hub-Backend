@@ -9,8 +9,8 @@ from pydantic import BaseModel, AfterValidator
 from app.schemas.enums import DeviceType
 from app.schemas.utils import is_empty
 
-
 # ──────────────────── Request Schemas ──────────────────── #
+
 
 class DeviceRequest(BaseModel):
     name: Annotated[str, AfterValidator(is_empty)]
@@ -22,10 +22,13 @@ class EdgeDeviceRequest(BaseModel):
     key: Annotated[str, AfterValidator(is_empty)]
     type: DeviceType
 
+
 # ──────────────────── Response Schemas ──────────────────── #
+
 
 class DeviceResponse(BaseModel):
     """Single device response – excludes sensitive fields (hashed_key, user_id)."""
+
     id: UUID
     name: str
     type: int
@@ -41,15 +44,19 @@ class DeviceResponse(BaseModel):
 
 class DeviceRegisterResponse(BaseModel):
     """Returned after successfully registering a new device."""
+
     device_id: UUID
     api_key: str
 
+
 class DeviceToggleResponse(BaseModel):
     """Returned after toggling a device's active status."""
+
     is_active: bool
 
 
 class DeviceVerifyResponse(BaseModel):
     """Returned after verifying an edge device."""
+
     session_token: str | None = None
     verified: bool = False

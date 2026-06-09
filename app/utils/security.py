@@ -20,7 +20,8 @@ def to_uuid_4_by_bytes(uuid: bytes):
         return UUID(bytes=uuid)
     except Exception:
         raise INVALID_UUID
-    
+
+
 def generate_secure_string(length=8):
     characters = string.ascii_letters + string.digits
-    return ''.join(secrets.choice(characters) for _ in range(length))
+    return "".join(secrets.choice(characters) for _ in range(length))

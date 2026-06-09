@@ -4,7 +4,6 @@ from app.models.device import Device
 from uuid import UUID
 
 
-
 async def verify_key(db: AsyncSession, api_key: bytes):
     return await db.scalar(
         select(Device).where(
@@ -14,24 +13,27 @@ async def verify_key(db: AsyncSession, api_key: bytes):
         )
     )
 
+
 async def get_masked_key(db: AsyncSession, user_id: UUID):
     return await db.scalar(
         select(Device.key_hint, Device.revoked).where(Device.user_id == user_id)
     )
+
 
 async def get_by_id(db: AsyncSession, device_id: UUID, user_id: UUID):
     return await db.scalar(
         select(Device).where(Device.id == device_id, Device.user_id == user_id)
     )
 
+
 async def get_by_user(db: AsyncSession, user_id: UUID):
     result = await db.execute(select(Device).where(Device.user_id == user_id))
     return result.scalars().all()
 
+
 async def get_only_by_device_id(db: AsyncSession, device_id: UUID):
-    return await db.scalar(
-        select(Device).where(Device.id == device_id)
-    )
+    return await db.scalar(select(Device).where(Device.id == device_id))
+
 
 async def revoke(db: AsyncSession, device_id: UUID, user_id: UUID):
     stmt = (
@@ -46,6 +48,7 @@ async def revoke(db: AsyncSession, device_id: UUID, user_id: UUID):
         await db.rollback()
         raise e
 
+
 async def revoke_all(db: AsyncSession, user_id: UUID):
     stmt = update(Device).where(Device.user_id == user_id).values(revoked=True)
     try:
@@ -54,6 +57,7 @@ async def revoke_all(db: AsyncSession, user_id: UUID):
     except Exception as e:
         await db.rollback()
         raise e
+
 
 async def register(db: AsyncSession, payload: dict):
     stmt = insert(Device).values(**payload).returning(Device.id)
@@ -65,9 +69,8 @@ async def register(db: AsyncSession, payload: dict):
         await db.rollback()
         raise e
 
-async def rotate_key(
-    db: AsyncSession, payload: dict, device_id: UUID, user_id: UUID
-):
+
+async def rotate_key(db: AsyncSession, payload: dict, device_id: UUID, user_id: UUID):
     stmt = (
         update(Device)
         .where(Device.id == device_id, Device.user_id == user_id)
@@ -79,6 +82,7 @@ async def rotate_key(
     except Exception as e:
         await db.rollback()
         raise e
+
 
 async def toggle_active(db: AsyncSession, device_id: UUID, user_id: UUID):
     stmt = (
@@ -97,6 +101,7 @@ async def toggle_active(db: AsyncSession, device_id: UUID, user_id: UUID):
     except Exception as e:
         await db.rollback()
         raise e
+
 
 async def delete(db: AsyncSession, device_id: UUID):
     stmt = delete(Device).where(Device.id == device_id)

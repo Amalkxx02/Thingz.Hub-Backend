@@ -1,7 +1,6 @@
 from app.middleware.error_handler import ExceptionHelper
 from fastapi import status
 
-
 INVALID_CREDENTIALS = ExceptionHelper(
     status_code=status.HTTP_401_UNAUTHORIZED,
     message="Invalid credentials",

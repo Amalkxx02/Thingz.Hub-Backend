@@ -8,7 +8,6 @@ from pydantic import BaseModel
 
 from app.schemas.enums import DataType, ThingType
 
-
 # ──────────────────── Request Schemas ──────────────────── #
 
 

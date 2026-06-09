@@ -6,12 +6,13 @@ from uuid import UUID
 from app.models.user import User
 
 
-
 async def get_user(db: AsyncSession, user_id: UUID):
     return await db.scalar(select(User).where(User.user_id == user_id))
 
+
 async def get_by_email(db: AsyncSession, email: EmailStr):
     return await db.scalar(select(User).where(User.email == email))
+
 
 async def onboard(db: AsyncSession, payload: dict):
     stmt = insert(User).values(**payload).returning(User)
@@ -22,6 +23,7 @@ async def onboard(db: AsyncSession, payload: dict):
     except Exception as e:
         await db.rollback()
         raise e
+
 
 #     @staticmethod
 #     def update(db: AsyncSession, db_obj: User, obj_in: UserUpdate):
@@ -39,6 +41,7 @@ async def onboard(db: AsyncSession, payload: dict):
 #         db.refresh(db_obj)
 #         return db_obj
 
+
 async def delete(db: AsyncSession, user_id: UUID):
     stmt = delete(User).where(User.user_id == user_id)
     try:
@@ -46,5 +49,3 @@ async def delete(db: AsyncSession, user_id: UUID):
         await db.commit()
     except Exception as e:
         raise e
-
-

@@ -2,6 +2,7 @@ from uuid import UUID
 
 from fastapi import WebSocket
 
+
 class ConnectionManager:
     def __init__(self):
         self.active_connections: dict[UUID, list[WebSocket]] = {}
@@ -23,5 +24,6 @@ class ConnectionManager:
         if id in self.active_connections:
             for connection in self.active_connections[id]:
                 await connection.send_text(data)
+
 
 manager = ConnectionManager()

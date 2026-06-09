@@ -62,7 +62,7 @@
 #             row = result.mappings().all()
 
 #         await db.commit()
-        
+
 #         return row
 
 #     except Exception as e:

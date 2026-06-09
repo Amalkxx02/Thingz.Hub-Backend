@@ -40,14 +40,19 @@ class Thing(Base):
     hardware_address = Column(String, nullable=True, server_default="0")
 
     is_active = Column(Boolean, default=True)
-    
-    meta = Column(JSONB, server_default='{}')
+
+    meta = Column(JSONB, server_default="{}")
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     __table_args__ = (
-        UniqueConstraint("device_id", "hardware_address", "slug", name="unique_device_id_hardware_address_slug"),
+        UniqueConstraint(
+            "device_id",
+            "hardware_address",
+            "slug",
+            name="unique_device_id_hardware_address_slug",
+        ),
     )
 
     # device = relationship("Device", back_populates="things")

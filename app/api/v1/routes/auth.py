@@ -12,7 +12,9 @@ from app.database.session import get_db
 router = APIRouter()
 
 
-@router.post("/sign_up", status_code=status.HTTP_201_CREATED, response_model=MessageResponse)
+@router.post(
+    "/sign_up", status_code=status.HTTP_201_CREATED, response_model=MessageResponse
+)
 async def sign_up(
     user_in: AuthIn,
     db: AsyncSession = Depends(get_db),
@@ -45,9 +47,13 @@ async def verify(token: UUID, db: AsyncSession = Depends(get_db)):
     return HTMLResponse(content=html_content)
 
 
-@router.post("/sign_out", status_code=status.HTTP_200_OK, response_model=MessageResponse)
+@router.post(
+    "/sign_out", status_code=status.HTTP_200_OK, response_model=MessageResponse
+)
 async def sign_out(
-    is_all: bool, db: AsyncSession = Depends(get_db), token_info: dict = Depends(get_refresh)
+    is_all: bool,
+    db: AsyncSession = Depends(get_db),
+    token_info: dict = Depends(get_refresh),
 ):
     return await auth_service.sign_out(db, token_info, is_all)
 
