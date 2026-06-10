@@ -26,6 +26,6 @@ class Auth(Base):
     password = Column(LargeBinary, nullable=False)
     verified = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     # devices = relationship("Device", back_populates="user")
     # things_card = relationship("ThingCard", back_populates="user")

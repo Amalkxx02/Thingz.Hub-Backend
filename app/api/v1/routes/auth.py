@@ -2,12 +2,13 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.schemas.auth import AuthIn, VerificationResponse
+from app.schemas.auth import AuthIn
 from app.schemas.response import MessageResponse
-from app.core.security.dependency import get_refresh
+from app.core.jwt.dependency import get_refresh
 from app.schemas.token import TokenResponse
 from app.services import auth as auth_service
 from app.database.session import get_db
+from app.database.cache_db import CacheDB, get_cache_db
 
 router = APIRouter()
 
@@ -18,8 +19,9 @@ router = APIRouter()
 async def sign_up(
     user_in: AuthIn,
     db: AsyncSession = Depends(get_db),
+    cache_db: CacheDB = Depends(get_cache_db),
 ):
-    return await auth_service.register(db, user_in.model_dump())
+    return await auth_service.register(db, cache_db, user_in.model_dump())
 
 
 @router.post("/sign_in", status_code=status.HTTP_200_OK, response_model=TokenResponse)
@@ -28,8 +30,12 @@ async def sign_in(user_in: AuthIn, db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/verify", status_code=status.HTTP_200_OK, response_class=HTMLResponse)
-async def verify(token: UUID, db: AsyncSession = Depends(get_db)):
-    await auth_service.verify(db, token)
+async def verify(
+    token: UUID,
+    db: AsyncSession = Depends(get_db),
+    cache_db: CacheDB = Depends(get_cache_db),
+):
+    await auth_service.verify(db, cache_db, token)
     html_content = """
     <html>
         <head>

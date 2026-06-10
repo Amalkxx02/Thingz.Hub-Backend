@@ -41,7 +41,7 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 @app.get("/", include_in_schema=False)
 async def root():
     """Root endpoint"""
-    return {"message": "Welcome to FastAPI", "version": settings.PROJECT_VERSION}
+    return {"message": "Welcome to ThingzHub", "version": settings.PROJECT_VERSION}
 
 
 @app.get("/health", include_in_schema=False)

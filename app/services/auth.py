@@ -1,3 +1,4 @@
+from datetime import timedelta
 from uuid import UUID, uuid4
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,6 +7,7 @@ from app.crud import auth as crud_auth
 from app.crud import token as crud_token
 from app.crud import user as crud_user
 
+from app.database.cache_db import CacheDB
 from app.models.auth import Auth
 
 # from app.schemas.auth import VerificationResponse
@@ -17,11 +19,10 @@ from app.schemas.token import TokenResponse
 
 from app.security.hashing import hash_password, verify_password
 
-from app.core.security.token import create_token
+from app.core.jwt.token import create_token
 
-from app.utils.datetime_utils import get_current_utc_time, get_future_utc_time
+from app.utils.datetime_utils import add_time, get_current_utc_time, get_future_utc_time
 
-pending_user = {}
 
 
 async def get_user(db: AsyncSession, user_id: UUID):
@@ -34,7 +35,7 @@ async def get_by_email(db: AsyncSession, email: str):
     return await crud_auth.get_by_email(db, email)
 
 
-async def register(db: AsyncSession, payload: dict) -> str:
+async def register(db: AsyncSession, cache_db: CacheDB, payload: dict) -> str:
 
     email = payload["email"]
     user: Auth = await crud_auth.get_by_email(db, email)
@@ -45,7 +46,7 @@ async def register(db: AsyncSession, payload: dict) -> str:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Email already registered and verified. Please login.",
             )
-        else:
+        elif not (add_time(user.created_at, 10) < get_current_utc_time()):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Email already registered but not verified. Check your inbox.",
@@ -57,31 +58,22 @@ async def register(db: AsyncSession, payload: dict) -> str:
     await crud_auth.insert_auth(db, payload)
 
     token = uuid4()
-    expires_at = get_future_utc_time(minutes=10)
-    pending_user[token] = {
-        "email": payload["email"],
-        "expires_at": expires_at,
-    }
+
+    await cache_db.set(token, payload["email"], 600)
 
     verification_link = f"http://127.0.0.1:8000/api/v1/auths/verify?token={token}"
     print(verification_link)
     return MessageResponse(message="Verification link sent to your email.")
 
 
-async def verify(db: AsyncSession, token: UUID):
-    pending: dict = pending_user.get(token)
-    if not pending:
+async def verify(db: AsyncSession, cache_db: CacheDB, token: UUID):
+    email: str = await cache_db.get(token)
+    if not email:
         raise HTTPException(status_code=400, detail="Invalid or Expired token")
-
-    if get_current_utc_time() > pending["expires_at"]:
-        del pending_user[token]
-        raise HTTPException(status_code=400, detail="Token Expired")
-
-    email = pending.get("email")
 
     await crud_auth.verify(db, email)
 
-    del pending_user[token]
+    await cache_db.delete(token)
 
     return {"message": "Email verified. Account created."}
 
@@ -105,7 +97,7 @@ async def authenticate(db: AsyncSession, payload: dict):
         onboarded = user.is_onboarded
     else:
         onboarded = False
-    data = {"email": auth_user.email, "sub": str(auth_user.id)}
+    data = {"is_onboarded": onboarded, "sub": str(auth_user.id)}
     return TokenResponse(
         is_onboarded=onboarded,
         access_token=await create_token(JwtType.ACCESS, data),

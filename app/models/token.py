@@ -16,3 +16,4 @@ class Token(Base):
     token_hash = Column(LargeBinary, nullable=False)
     revoked = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
