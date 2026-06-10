@@ -12,7 +12,7 @@ async def get_by_user(db: AsyncSession, user_id: UUID):
     return await db.scalar(select(Token).where(Token.sub == user_id))
 
 
-async def insert(db: AsyncSession, payload: dict):
+async def insert_token(db: AsyncSession, payload: dict):
     stmt = insert(Token).values(**payload)
     try:
         result = await db.execute(stmt)
