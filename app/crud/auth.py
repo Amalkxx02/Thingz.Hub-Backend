@@ -16,7 +16,7 @@ async def get_by_email(db: AsyncSession, email: EmailStr):
     return await db.scalar(select(Auth).where(Auth.email == email))
 
 
-async def insert(db: AsyncSession, payload: dict):
+async def insert_auth(db: AsyncSession, payload: dict):
     stmt = insert(Auth).values(**payload)
     try:
         await db.execute(stmt)
