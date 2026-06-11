@@ -50,4 +50,4 @@ async def custom_validation_error_handler(
 def setup_exception_handlers(app):
     app.add_exception_handler(ExceptionHelper, custom_exception_handler)
     app.add_exception_handler(RequestValidationError, custom_validation_error_handler)
-    app.add_exception_handler(Exception, global_exception_handler)
+    # app.add_exception_handler(Exception, global_exception_handler)

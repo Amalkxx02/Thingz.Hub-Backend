@@ -16,8 +16,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title=settings.PROJECT_NAME,
-    description=settings.DESCRIPTION,
+    title="ThingzHub",
+    description="An inspirational IoT Dashboard",
     version=settings.PROJECT_VERSION,
     debug=settings.DEBUG,
     lifespan=lifespan,

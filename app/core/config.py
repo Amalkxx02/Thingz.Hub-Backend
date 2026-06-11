@@ -8,9 +8,7 @@ class Settings(BaseSettings):
 
     # --- Project Metadata ---
     API_V1_STR: str
-    PROJECT_NAME: str
     PROJECT_VERSION: str
-    DESCRIPTION: str
 
     # --- JWT ---
     JWT_ALGORITHM: str
@@ -25,13 +23,14 @@ class Settings(BaseSettings):
     PREFIX: str
 
     # --- Server Configuration ---
-    HOST: str
-    PORT: int
     DEBUG: bool
-    RELOAD: bool
 
     # --- Database Configuration ---
     DATABASE_URL: str
+
+    # --- Valkey Configuration ---
+    VALKEY_HOST: str
+    VALKEY_PORT:int
 
     # --- CORS Configuration ---
     CORS_ORIGINS: list[str]

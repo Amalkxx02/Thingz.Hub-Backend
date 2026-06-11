@@ -12,7 +12,7 @@ from sqlalchemy.sql import func
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 import uuid
 
-from app.database.base import Base
+from app.database.session import Base
 
 
 class Thing(Base):

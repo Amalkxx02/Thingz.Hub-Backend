@@ -10,7 +10,13 @@ pending_user = {}
 
 async def get_user(db: AsyncSession, user_id: UUID):
     """Get user by ID"""
-    return await crud_user.get_user(db, user_id)
+    result = await crud_user.get_user(db, user_id)
+    if not result:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User profile is incomplete. Please complete onboarding first.",
+        )
+    return result
 
 
 async def get_by_email(db: AsyncSession, email: str):

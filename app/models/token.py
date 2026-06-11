@@ -2,7 +2,7 @@ from sqlalchemy import Column, ForeignKey, LargeBinary, DateTime, Boolean
 from sqlalchemy.sql import func
 from sqlalchemy.dialects.postgresql import UUID
 
-from app.database.base import Base
+from app.database.session import Base
 
 
 class Token(Base):

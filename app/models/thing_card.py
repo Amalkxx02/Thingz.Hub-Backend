@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, ForeignKey, JSON, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 
-from app.database.base import Base
+from app.database.session import Base
 
 
 class ThingCard(Base):

@@ -4,25 +4,26 @@ from sqlalchemy import select, delete, insert, update
 from uuid import UUID
 
 from app.models.user import User
+from app.utils.decorators import handle_db_errors
 
 
+@handle_db_errors
 async def get_user(db: AsyncSession, user_id: UUID):
     return await db.scalar(select(User).where(User.user_id == user_id))
 
 
+@handle_db_errors
 async def get_by_email(db: AsyncSession, email: EmailStr):
     return await db.scalar(select(User).where(User.email == email))
 
 
+@handle_db_errors
 async def onboard(db: AsyncSession, payload: dict):
     stmt = insert(User).values(**payload).returning(User)
-    try:
-        result = await db.execute(stmt)
-        await db.commit()
-        return result.scalar_one()
-    except Exception as e:
-        await db.rollback()
-        raise e
+
+    result = await db.execute(stmt)
+    await db.commit()
+    return result.scalar_one()
 
 
 #     @staticmethod
@@ -42,10 +43,9 @@ async def onboard(db: AsyncSession, payload: dict):
 #         return db_obj
 
 
+@handle_db_errors
 async def delete(db: AsyncSession, user_id: UUID):
     stmt = delete(User).where(User.user_id == user_id)
-    try:
-        await db.execute(stmt)
-        await db.commit()
-    except Exception as e:
-        raise e
+    
+    await db.execute(stmt)
+    await db.commit()

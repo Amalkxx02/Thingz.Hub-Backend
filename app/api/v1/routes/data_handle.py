@@ -3,7 +3,7 @@ from sqlalchemy import select, and_
 
 from app.core.security.dependency import get_current_device, get_current_user
 from app.database.session import get_db
-from app.database import CacheDB, get_cache_db
+from app.database.cache_db import CacheDB, get_cache_db
 from app.models.thing import Thing
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID

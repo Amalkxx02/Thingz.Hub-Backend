@@ -1,7 +1,7 @@
 from uuid import UUID
-from fastapi import Request
+from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.database import CacheDB
+from app.database.cache_db import CacheDB
 from app.schemas.thing import (
     EdgeThingzRequest,
     UpdateThingRequest,
@@ -51,5 +51,9 @@ async def update(
 
 
 async def delete(db: AsyncSession, thing_id: UUID, user_id: UUID) -> MessageResponse:
-    await crud_thing.delete(db, thing_id, user_id)
+    if not await crud_thing.delete_by_id(db, thing_id, user_id):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Thing not found, or you do not have permission to delete it.",
+        )
     return MessageResponse(message="Thing deleted successfully.")

@@ -12,7 +12,6 @@ def is_strong_password(password: str):
     )
     if not STRONG_PASSWORD_REGEX.match(password):
         raise ValueError(
-            "Password must be at least 8 characters long, "
             "contain uppercase and lowercase letters, "
             "a number, and a special character."
         )

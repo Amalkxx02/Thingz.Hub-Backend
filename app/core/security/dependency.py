@@ -5,7 +5,7 @@ from jose.exceptions import ExpiredSignatureError, JWTError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.session import get_db
-from app.database import CacheDB, get_cache_db
+from app.database.cache_db import CacheDB, get_cache_db
 from app.schemas.enums import JwtType
 
 from app.security.hashing import verify_fingerprint
@@ -42,10 +42,9 @@ async def get_current_device(
     x_device_id: UUID = Header(...),
     x_device_token: str = Header(...),
     cache: CacheDB = Depends(get_cache_db),
-):
-    if not cache.get(x_device_id) == x_device_token:
+):  
+    if not await cache.get(x_device_id) == x_device_token:
         raise INVALID_CREDENTIALS
-
     return x_device_id
 
 
