@@ -25,14 +25,11 @@ async def registration(
     return await thingz_service.registration(db, device_id, thingz)
 
 
-@router.patch("/{thing_id}", response_model=ThingUpdateResponse)
-async def update_a_thing(
-    thing_id: UUID,
-    thing: UpdateThingRequest,
-    db: AsyncSession = Depends(get_db),
-    user_id: UUID = Depends(get_verified_user_id),
+@router.get("", response_model=list[ThingResponse])
+async def get_by_user(
+    db: AsyncSession = Depends(get_db), user_id: UUID = Depends(get_verified_user_id)
 ):
-    return await thingz_service.update(db, thing_id, user_id, thing)
+    return await thingz_service.user_thing(db, user_id)
 
 
 @router.get("/{device_id}", response_model=list[ThingResponse])
@@ -44,11 +41,14 @@ async def get_by_device(
     return await thingz_service.device_thing(db, device_id, user_id)
 
 
-@router.get("", response_model=list[ThingResponse])
-async def get_by_user(
-    db: AsyncSession = Depends(get_db), user_id: UUID = Depends(get_verified_user_id)
+@router.patch("/{thing_id}", response_model=ThingUpdateResponse)
+async def update_a_thing(
+    thing_id: UUID,
+    thing: UpdateThingRequest,
+    db: AsyncSession = Depends(get_db),
+    user_id: UUID = Depends(get_verified_user_id),
 ):
-    return await thingz_service.user_thing(db, user_id)
+    return await thingz_service.update(db, thing_id, user_id, thing)
 
 
 @router.patch("/{thing_id}/status", response_model=ThingToggleResponse)
