@@ -4,7 +4,7 @@ from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.schemas.auth import AuthIn
 from app.schemas.response import MessageResponse
-from app.core.jwt.dependency import get_refresh
+from app.core.jwt.dependency import get_refresh_session,get_revocation_context
 from app.schemas.token import TokenResponse
 from app.services import auth as auth_service
 from app.database.session import get_db
@@ -59,11 +59,11 @@ async def verify(
 async def sign_out(
     is_all: bool,
     db: AsyncSession = Depends(get_db),
-    token_info: dict = Depends(get_refresh),
+    token_info: dict = Depends(get_revocation_context),
 ):
     return await auth_service.sign_out(db, token_info, is_all)
 
 
 @router.get("/refresh", status_code=status.HTTP_200_OK, response_model=TokenResponse)
-async def refresh_token(token_info: dict = Depends(get_refresh)):
-    return TokenResponse(refresh_token=token_info["token"])
+async def refresh_token(access_token: str = Depends(get_refresh_session)):
+    return TokenResponse(access_token=access_token)

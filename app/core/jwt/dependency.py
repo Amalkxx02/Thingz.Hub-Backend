@@ -17,15 +17,25 @@ from .oauth import get_current_token
 from app.services import token as token_service
 
 
-from app.core.exceptions import INVALID_CREDENTIALS, INVALID_TOKEN, TOKEN_EXPIRED
+from app.core.exceptions import (
+    INVALID_CREDENTIALS,
+    INVALID_TOKEN,
+    TOKEN_EXPIRED,
+    PROFILE_INCOMPLETE,
+)
 
 
-async def _verify_and_get_user(token: str) -> UUID:
+async def _validate_access_token(token: str, require_onboarding: bool) -> UUID:
     try:
         payload: dict = decode_token(token)
         user_id = payload.get("sub")
+
+        if require_onboarding and not payload.get("is_onboarded"):
+            raise PROFILE_INCOMPLETE
+
         if not user_id:
             raise INVALID_CREDENTIALS
+
         return to_uuid_4_by_str(user_id)
 
     except ExpiredSignatureError:
@@ -34,23 +44,28 @@ async def _verify_and_get_user(token: str) -> UUID:
         raise INVALID_TOKEN
 
 
-async def get_current_user(token: str = Depends(get_current_token)) -> UUID:
-    return await _verify_and_get_user(token)
+async def get_authenticated_user_id(token: str = Depends(get_current_token)) -> UUID:
+    return await _validate_access_token(token, False)
 
 
-async def get_current_device(
+async def get_verified_user_id(token: str = Depends(get_current_token)) -> UUID:
+    return await _validate_access_token(token, True)
+
+
+async def verify_device_session(
     x_device_id: UUID = Header(...),
     x_device_token: str = Header(...),
     cache: CacheDB = Depends(get_cache_db),
-):  
+):
     if not await cache.get(x_device_id) == x_device_token:
         raise INVALID_CREDENTIALS
+
     return x_device_id
 
 
-async def get_refresh(
-    db: AsyncSession = Depends(get_db), token: str = Depends(get_current_token)
-) -> dict:
+async def _validate_refresh_token(
+    db: AsyncSession, token: str, require_token: bool
+) -> dict | UUID:
     try:
         payload: dict = decode_token(token, JwtType.REFRESH)
 
@@ -64,19 +79,30 @@ async def get_refresh(
 
         if not record:
             raise INVALID_TOKEN
-        if record["revoked"]:
+
+        if record.revoked:
             raise INVALID_TOKEN
-        if not verify_fingerprint(token, record["token_hash"]):
+
+        if not verify_fingerprint(token, record.token_hash):
             await token_service.revoke(db, user_id)
             raise INVALID_TOKEN
 
-        data = {"email": payload["email"], "sub": str(user_id)}
+        if require_token:
+            data = {"is_onboarded": payload.get("is_onboarded"), "sub": str(user_id)}
+            new_token = await create_token(db, data)
+            return new_token
 
-        new_token = await create_token(db, data)
-
-        return {"token": new_token, "jti": jti, "user_id": user_id}
+        return {"jti": jti, "user_id": user_id}
 
     except ExpiredSignatureError:
         raise TOKEN_EXPIRED
     except JWTError:
         raise INVALID_TOKEN
+
+
+async def get_refresh_session(db: AsyncSession = Depends(get_db),token: str = Depends(get_current_token)) -> str:
+    return await _validate_refresh_token(db, token, True)
+
+
+async def get_revocation_context(db: AsyncSession = Depends(get_db),token: str = Depends(get_current_token)) -> dict:
+    return await _validate_refresh_token(db, token, False)

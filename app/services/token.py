@@ -15,7 +15,7 @@ async def get_by_user(db: AsyncSession, user_id: UUID):
 
 async def insert(db: AsyncSession, payload: dict):
     payload["token"] = get_fingerprint(payload["token"])
-    await crud_token.insert(db, TokenRequest(**payload).model_dump())
+    await crud_token.insert_token(db, TokenRequest(**payload).model_dump())
 
 
 async def revoke(db: AsyncSession, jti: UUID, user_id: UUID):

@@ -11,7 +11,7 @@ from app.schemas.device import (
     DeviceVerifyResponse,
 )
 from app.schemas.response import MessageResponse
-from app.core.jwt.dependency import get_current_device, get_current_user
+from app.core.jwt.dependency import verify_device_session, get_verified_user_id
 from app.services import device as device_service
 from app.database.session import get_db
 
@@ -22,7 +22,7 @@ router = APIRouter()
 async def add_a_device(
     onboard: DeviceRequest,
     db: AsyncSession = Depends(get_db),
-    user_id: UUID = Depends(get_current_user),
+    user_id: UUID = Depends(get_verified_user_id),
 ):
     return await device_service.register(db, onboard.model_dump(), user_id)
 
@@ -31,14 +31,14 @@ async def add_a_device(
 async def get_a_device(
     device_id: UUID,
     db: AsyncSession = Depends(get_db),
-    user_id: UUID = Depends(get_current_user),
+    user_id: UUID = Depends(get_verified_user_id),
 ):
     return await device_service.get(db, device_id, user_id)
 
 
 @router.get("", response_model=list[DeviceResponse])
 async def get_all_device(
-    db: AsyncSession = Depends(get_db), user_id: UUID = Depends(get_current_user)
+    db: AsyncSession = Depends(get_db), user_id: UUID = Depends(get_verified_user_id)
 ):
     return await device_service.get_all(db, user_id)
 
@@ -47,7 +47,7 @@ async def get_all_device(
 async def toggle_a_device_status(
     device_id: UUID,
     db: AsyncSession = Depends(get_db),
-    user_id: UUID = Depends(get_current_user),
+    user_id: UUID = Depends(get_verified_user_id),
 ):
     return await device_service.toggle_device(db, device_id, user_id)
 
@@ -56,7 +56,7 @@ async def toggle_a_device_status(
 async def rotate_a_device_key(
     device_id: UUID,
     db: AsyncSession = Depends(get_db),
-    user_id: UUID = Depends(get_current_user),
+    user_id: UUID = Depends(get_verified_user_id),
 ):
     return await device_service.rotate_key(db, device_id, user_id)
 
@@ -65,7 +65,7 @@ async def rotate_a_device_key(
 async def revoke_a_device(
     device_id: UUID,
     db: AsyncSession = Depends(get_db),
-    user_id: UUID = Depends(get_current_user),
+    user_id: UUID = Depends(get_verified_user_id),
 ):
     return await device_service.revoke_key(db, user_id, device_id)
 
@@ -73,7 +73,7 @@ async def revoke_a_device(
 @router.patch("/revoke", response_model=MessageResponse)
 async def revoke_all_device(
     db: AsyncSession = Depends(get_db),
-    user_id: UUID = Depends(get_current_user),
+    user_id: UUID = Depends(get_verified_user_id),
 ):
     return await device_service.revoke_key(db, user_id)
 
@@ -82,7 +82,7 @@ async def revoke_all_device(
 async def delete_a_device(
     device_id: UUID,
     db: AsyncSession = Depends(get_db),
-    user_id: UUID = Depends(get_current_user),
+    user_id: UUID = Depends(get_verified_user_id),
 ):
     return await device_service.delete(db, device_id, user_id)
 

@@ -45,5 +45,5 @@ class TokenResponse(BaseModel):
     """Returned after sign-in and token refresh."""
 
     is_onboarded: bool = False
-    access_token: str | None = None
-    refresh_token: str
+    access_token: str 
+    refresh_token: str | None = None

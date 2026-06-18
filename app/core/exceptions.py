@@ -31,3 +31,9 @@ INVALID_UUID = ExceptionHelper(
     message="Provided id is not a valid uuid",
     error=f"Invalid UUID",
 )
+
+PROFILE_INCOMPLETE = ExceptionHelper(
+    status_code=status.HTTP_400_BAD_REQUEST,
+    message="Profile is incomplete",
+    error=f"Profile Icomplete",
+)

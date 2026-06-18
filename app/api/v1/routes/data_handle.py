@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 from sqlalchemy import select, and_
 
-from app.core.jwt.dependency import get_current_device, get_current_user
+from app.core.jwt.dependency import verify_device_session, get_verified_user_id
 from app.database.session import get_db
 from app.database.cache_db import CacheDB, get_cache_db
 from app.models.thing import Thing
@@ -18,7 +18,7 @@ thing: dict[str, int] = {}
 @router.websocket("/client")
 async def data_handle_client(ws: WebSocket, jwt_key: str):
 
-    user_id = await get_current_user(jwt_key)
+    user_id = await get_verified_user_id(jwt_key)
     await ws.accept()
 
     connected_client[user_id] = ws
@@ -35,7 +35,7 @@ async def data_handle_client(ws: WebSocket, jwt_key: str):
 @router.websocket("/device")
 async def data_handle_thing(
     ws: WebSocket,
-    device_id: UUID = Depends(get_current_device),
+    device_id: UUID = Depends(verify_device_session),
     db: AsyncSession = Depends(get_db),
 ):
     pass

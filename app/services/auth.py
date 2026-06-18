@@ -98,10 +98,13 @@ async def authenticate(db: AsyncSession, payload: dict):
     else:
         onboarded = False
     data = {"is_onboarded": onboarded, "sub": str(auth_user.id)}
+    access_token = {"token_type":"access_token", **data}
+    refresh_token = {"token_type":"refresh_token", **data}
+
     return TokenResponse(
         is_onboarded=onboarded,
-        access_token=await create_token(JwtType.ACCESS, data),
-        refresh_token=await create_token(JwtType.REFRESH, data),
+        access_token=await create_token(db, access_token, JwtType.ACCESS),
+        refresh_token=await create_token(db, refresh_token, JwtType.REFRESH),
     )
 
 
