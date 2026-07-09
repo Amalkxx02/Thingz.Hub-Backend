@@ -41,9 +41,9 @@ class Device(Base):
     hashed_key = Column(LargeBinary, nullable=False, index=True)
     key_hint = Column(String, nullable=False)
 
-    is_revoked = Column(Boolean, default=False)
-    is_active = Column(Boolean, default=False)
-    is_registered = Column(Boolean, default=False)
+    is_revoked = Column(Boolean, default=False, nullable=False)
+    is_active = Column(Boolean, default=False, nullable=False)
+    is_registered = Column(Boolean, default=False, nullable=False)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

@@ -12,6 +12,7 @@ class DeviceType(IntEnum):
     NODE = 1
 
 
+
 # =====================================================================
 #  Request Schemas
 # =====================================================================
@@ -28,11 +29,30 @@ class EdgeDeviceRequest(BaseModel):
     firmware:str
     ip_address:IpAddress
 
+class DeviceFilter(BaseModel):
+    is_revoked:bool|None = None
+    is_active:bool|None = None
+    is_registered:bool|None = None
+
 
 # =====================================================================
 #  DTO Schemas
 # =====================================================================
+class DeviceModel(BaseModel):
+    user_id:UUID
+    name:str
+    type: DeviceType
+    hashed_key: bytes
+    key_hint:str
 
+class EdgeDeviceModel(BaseModel):
+    mac_address:MacAddress
+    firmware:str
+    ip_address:IpAddress
+
+class DeviceKeyRotationModel(BaseModel):
+    hashed_key: bytes
+    key_hint:str
 # =====================================================================
 #  Response Schemas
 # =====================================================================
@@ -47,6 +67,7 @@ class DeviceListResponse(BaseModel):
     type: int
     is_revoked: bool
     is_active: bool
+    is_registered:bool
 
     model_config = {"from_attributes":True}
 

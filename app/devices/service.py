@@ -1,11 +1,17 @@
 from uuid import UUID
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.common.schemas import PaginationParams
 from app.devices import crud as device_crud
 
 from app.core.cache import CacheDB
 from app.devices.schemas import (
+    DeviceFilter,
+    DeviceKeyRotationModel,
     DeviceListResponse,
+    DeviceModel,
+    DeviceRequest,
+    EdgeDeviceModel,
     EdgeDeviceRequest,
     DeviceResponse,
     DeviceRegisterResponse,
@@ -18,6 +24,9 @@ from app.core.security import get_fingerprint
 from app.utils.security import generate_secure_string, to_uuid_4_by_str
 
 
+# =====================================================================
+# 0. READ SERVICE
+# =====================================================================
 async def get_device_by_id(
     db: AsyncSession, device_id: UUID, user_id: UUID
 ) -> DeviceResponse:
@@ -32,9 +41,12 @@ async def get_device_by_id(
 
 
 async def list_devices_by_user_id(
-    db: AsyncSession, user_id: UUID
+    db: AsyncSession, pagination: PaginationParams, filter: DeviceFilter, user_id: UUID
 ) -> list[DeviceResponse | None]:
-    devices = await device_crud.list_devices_by_user_id(db, user_id)
+    filters = filter.model_dump(exclude_none=True)
+    devices = await device_crud.list_devices_by_user_id(
+        db, pagination, filters, user_id
+    )
     return [DeviceListResponse.model_validate(d) for d in devices] if devices else []
 
 
@@ -47,35 +59,46 @@ async def list_devices_by_user_id(
 #         )
 #     return device.is_revoked
 
+# =====================================================================
+# 1. CREATE SERVICE (Sign_up -> Verify)
+# =====================================================================
+
 
 async def create_device(
-    db: AsyncSession, payload: dict, user_id: UUID
+    db: AsyncSession, device: DeviceRequest, user_id: UUID
 ) -> DeviceRegisterResponse:
     api_key = generate_api_key()
     masked_key = mask_value(api_key)
     hashed_key = get_fingerprint(api_key)
-    payload = payload.model_dump()
-    payload.update(
-        {"user_id": user_id, "hashed_key": hashed_key, "key_hint": masked_key}
-    )
-    device_id = await device_crud.create_device(db, payload)
+    device_data = DeviceModel(
+        user_id=user_id,
+        name=device.name,
+        type=device.type,
+        hashed_key=hashed_key,
+        key_hint=masked_key,
+    ).model_dump()
+
+    device_id = await device_crud.create_device(db, device_data)
     return DeviceRegisterResponse(device_id=device_id, api_key=api_key)
 
 
-async def rotate_key(
+# =====================================================================
+# 1. UPDATE SERVICE (Sign_up -> Verify)
+# =====================================================================
+
+
+async def rotate_key_by_id(
     db: AsyncSession, device_id: UUID, user_id: UUID
 ) -> DeviceRegisterResponse:
     api_key = generate_api_key()
     masked_key = mask_value(api_key)
     hashed_key = get_fingerprint(api_key)
-    payload = {
-        "hashed_key": hashed_key,
-        "key_hint": masked_key,
-        "is_revoked": False,
-        "is_active": True,
-    }
 
-    if not await device_crud.rotate_device_api_key(db, payload, device_id, user_id):
+    device_data = DeviceKeyRotationModel(
+        hashed_key=hashed_key, key_hint=masked_key
+    ).model_dump()
+
+    if not await device_crud.rotate_device_api_key(db, device_data, device_id, user_id):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Device not found, or you do not have permission to rotate key of device",
@@ -101,7 +124,7 @@ async def revoke_key(
         return MessageResponse(message="All devices is_revoked successfully.")
 
 
-async def toggle_device(
+async def toggle_device_by_id(
     db: AsyncSession, device_id: UUID, user_id: UUID
 ) -> DeviceToggleResponse:
     is_active = await device_crud.toggle_device_state(db, device_id, user_id)
@@ -113,7 +136,14 @@ async def toggle_device(
     return DeviceToggleResponse(is_active=is_active)
 
 
-async def delete(db: AsyncSession, device_id: UUID, user_id: UUID) -> MessageResponse:
+# =====================================================================
+# 1. PURGE SERVICE
+# =====================================================================
+
+
+async def delete_device_by_id(
+    db: AsyncSession, device_id: UUID, user_id: UUID
+) -> MessageResponse:
     if not await device_crud.delete_device_by_id(db, device_id, user_id):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -122,13 +152,15 @@ async def delete(db: AsyncSession, device_id: UUID, user_id: UUID) -> MessageRes
     return MessageResponse(message="Device deleted successfully.")
 
 
-# -------------------------------------------------------------- #
+# =====================================================================
+# 1. EDGE DEVICE SERVICE
+# =====================================================================
 async def verify_api_key(db: AsyncSession, api_key: str):
     hashed_key = get_fingerprint(api_key)
-    result = await device_crud.get_device_by_api_key(db, hashed_key)
-    if not result:
+    device_id = await device_crud.get_device_by_api_key(db, hashed_key)
+    if not device_id:
         return False
-    return result.id
+    return device_id
 
 
 async def verify_device(
@@ -142,8 +174,16 @@ async def verify_device(
 
     if not device.id == device_id:
         return DeviceVerifyResponse(verified=False)
-    
+
     session_token = generate_secure_string()
     await cache.set(device_id, session_token)
 
-    return DeviceVerifyResponse(session_token, True)
+    device_data = EdgeDeviceModel(
+        mac_address=device.mac_address,
+        firmware=device.firmware,
+        ip_address=device.ip_address,
+    ).model_dump()
+
+    await device_crud.update_device(db, device_data, device_id)
+
+    return DeviceVerifyResponse(session_token=session_token, verified=True)
