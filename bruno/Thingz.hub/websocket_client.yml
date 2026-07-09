@@ -1,0 +1,18 @@
+info:
+  name: websocket_client
+  type: websocket
+
+websocket:
+  url: ws://127.0.0.1:8000/api/v1/websocket/client
+  message:
+    type: json
+    data: |-
+      {
+        "jwt_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzX3Rva2VuIiwiaXNfb25ib2FyZGVkIjp0cnVlLCJzdWIiOiIxMWUxOWQ5NS0yMjFiLTQ3NTEtYjkwMS1iNWE0ZjUzODRlMWYiLCJpYXQiOjE3ODE4NzkzOTIsImV4cCI6MTc4MTg4MDI5Mn0.x9s9LhNmMzBvbyTobbE88dXGFZ6CA7QTgmoM9jIItHs"
+      }
+  auth: inherit
+
+settings:
+  timeout: 0
+  keepAliveInterval: 0
+​

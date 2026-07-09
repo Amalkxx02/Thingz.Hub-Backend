@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect,Query
 from sqlalchemy import select, and_
 
-from app.core.jwt.dependency import verify_device_session, get_verified_user_id
-from app.database.session import get_db
-from app.database.cache_db import CacheDB, get_cache_db
-from app.models.thing import Thing
+from app.core.jwt.dependency import verify_device_session, get_authenticated_user_id
+from app.core.database import get_db
+from app.core.cache import CacheDB, get_cache_db
+from app.things.models import Thing
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 
@@ -16,9 +16,10 @@ thing: dict[str, int] = {}
 
 
 @router.websocket("/client")
-async def data_handle_client(ws: WebSocket, jwt_key: str):
-
-    user_id = await get_verified_user_id(jwt_key)
+async def data_handle_client(ws: WebSocket, jwt_key: str = Query()):
+    print(jwt_key)
+    user_id = await get_authenticated_user_id(jwt_key)
+    print(user_id)
     await ws.accept()
 
     connected_client[user_id] = ws

@@ -3,8 +3,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
-from app.api.v1 import api_router
-from app.database.session import init_db
+from app.api import api_router
+from app.core.database import init_db
 from app.middleware.error_handler import setup_exception_handlers
 from contextlib import asynccontextmanager
 
