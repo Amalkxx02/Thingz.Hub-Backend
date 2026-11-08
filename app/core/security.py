@@ -5,8 +5,8 @@ import hashlib
 from jose import jwt
 
 from app.core.config import settings
-from app.tokens import schemas
-from app.tokens import service as token_service
+from app.module.tokens import schemas
+from app.module.tokens import service as token_service
 from app.utils.datetime_utils import get_current_utc_time, get_future_utc_time
 
 

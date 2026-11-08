@@ -1,6 +1,6 @@
 from pydantic import BaseModel, HttpUrl
 
-from ..common.utils import Email, StrongPassword
+from ...common.utils import Email, StrongPassword
 
 # =====================================================================
 #  Request Schemas

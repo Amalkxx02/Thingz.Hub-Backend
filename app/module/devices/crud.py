@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import delete, desc, select, insert, update
 from app.common.schemas import PaginationParams
-from app.devices.models import Device
+from app.module.devices.models import Device
 from uuid import UUID
 
 from app.utils.decorators import handle_db_errors

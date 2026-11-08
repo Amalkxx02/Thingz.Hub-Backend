@@ -1,8 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import uuid4, UUID
 
-from app.tokens import crud as token_crud
-from app.tokens.schemas import AccessTokenModel, RefreshTokenModel, TokenResponse
+from app.module.tokens import crud as token_crud
+from app.module.tokens.schemas import AccessTokenModel, RefreshTokenModel, TokenResponse
 
 from app.utils import datetime_utils
 

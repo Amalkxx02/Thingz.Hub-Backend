@@ -1,7 +1,7 @@
 from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.things.schemas import (
+from app.module.things.schemas import (
     EdgeThingzRequest,
     UpdateThingRequest,
     ThingResponse,
@@ -10,7 +10,7 @@ from app.things.schemas import (
 )
 from app.common.response import MessageResponse
 from app.api.dependencies import verify_device_session, get_authenticated_user_id
-from app.things import service as thingz_service
+from app.module.things import service as thingz_service
 from app.core.database import get_db
 
 router = APIRouter()

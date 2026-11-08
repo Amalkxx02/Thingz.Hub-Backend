@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import delete, insert, select, update
-from app.tokens.models import Token
+from app.module.tokens.models import Token
 from uuid import UUID
 
 from app.utils.decorators import handle_db_errors

@@ -4,7 +4,7 @@ from sqlalchemy import select, and_
 from app.core.jwt.dependency import verify_device_session, get_authenticated_user_id
 from app.core.database import get_db
 from app.core.cache import CacheDB, get_cache_db
-from app.things.models import Thing
+from app.module.things.models import Thing
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 

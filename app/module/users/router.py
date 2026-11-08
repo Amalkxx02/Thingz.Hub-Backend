@@ -2,8 +2,8 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.users import service as user_service
-from app.users.schemas import UserResponse
+from app.module.users import service as user_service
+from app.module.users.schemas import UserResponse
 
 from app.api.dependencies import get_authenticated_user_id
 from app.core.database import get_db

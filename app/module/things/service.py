@@ -2,7 +2,7 @@ from uuid import UUID
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.cache import CacheDB
-from app.things.schemas import (
+from app.module.things.schemas import (
     EdgeThingzRequest,
     UpdateThingRequest,
     ThingResponse,
@@ -12,7 +12,7 @@ from app.things.schemas import (
 from app.common.response import MessageResponse
 from app.core.security import get_fingerprint
 from app.utils.security import generate_secure_string, to_uuid_4_by_str
-from app.things import crud as crud_thing
+from app.module.things import crud as crud_thing
 
 
 async def registration(

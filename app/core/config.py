@@ -29,8 +29,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str
 
     # --- Valkey Configuration ---
-    VALKEY_HOST: str
-    VALKEY_PORT:int
+    VALKEY_URL: str
 
     # --- CORS Configuration ---
     CORS_ORIGINS: list[str]

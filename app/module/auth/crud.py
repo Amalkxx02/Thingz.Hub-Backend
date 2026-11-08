@@ -4,7 +4,7 @@ from sqlalchemy import select, delete, update
 from sqlalchemy.dialects.postgresql import insert
 from uuid import UUID
 
-from app.auth.models import Auth
+from app.module.auth.models import Auth
 from app.utils.decorators import handle_db_errors
 
 # =====================================================================

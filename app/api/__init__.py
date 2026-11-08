@@ -1,10 +1,10 @@
 from fastapi import APIRouter
 
-from app.auth.router import router as auth_router
-from app.users.router import router as user_router
-from app.devices.router import router as device_router
-from app.devices.hardware_router import router as edge_router
-from app.things.router import router as thing_router
+from app.module.auth.router import router as auth_router
+from app.module.users.router import router as user_router
+from app.module.devices.router import router as device_router
+from app.module.devices.hardware_router import router as edge_router
+from app.module.things.router import router as thing_router
 
 api_router = APIRouter()
 

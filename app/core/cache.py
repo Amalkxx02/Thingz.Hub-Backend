@@ -2,9 +2,7 @@ from valkey.asyncio import Valkey
 from uuid import UUID
 from .config import settings
 
-client = Valkey(
-    host=settings.VALKEY_HOST, port=settings.VALKEY_PORT, decode_responses=True
-)
+client = Valkey.from_url(settings.VALKEY_URL)
 
 
 class CacheDB:

@@ -1,0 +1,14 @@
+info:
+  name: Untitled
+  type: websocket
+  seq: 1
+
+websocket:
+  url: ""
+  message:
+    - title: message 1
+      selected: false
+      message:
+        type: json
+        data: ""
+  auth: inherit

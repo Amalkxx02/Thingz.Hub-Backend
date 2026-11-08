@@ -7,10 +7,10 @@ from app.core.cache import CacheDB, get_cache_db
 from app.core.database import get_db
 
 # Schemas
-from app.devices.schemas import DeviceVerifyResponse, EdgeDeviceRequest
+from app.module.devices.schemas import DeviceVerifyResponse, EdgeDeviceRequest
 
 # Services
-from app.devices import service as device_service
+from app.module.devices import service as device_service
 
 router = APIRouter()
 

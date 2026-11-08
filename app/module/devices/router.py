@@ -10,7 +10,7 @@ from app.core.database import get_db
 
 # Schemas
 from app.common.response import MessageResponse
-from app.devices.schemas import (
+from app.module.devices.schemas import (
     DeviceListResponse,
     DeviceRegisterResponse,
     DeviceRequest,
@@ -20,7 +20,7 @@ from app.devices.schemas import (
 )
 
 # Services
-from app.devices import service as device_service
+from app.module.devices import service as device_service
 
 router = APIRouter()
 

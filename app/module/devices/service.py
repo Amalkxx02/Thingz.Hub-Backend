@@ -2,10 +2,10 @@ from uuid import UUID
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.common.schemas import PaginationParams
-from app.devices import crud as device_crud
+from app.module.devices import crud as device_crud
 
 from app.core.cache import CacheDB
-from app.devices.schemas import (
+from app.module.devices.schemas import (
     DeviceFilter,
     DeviceKeyRotationModel,
     DeviceListResponse,

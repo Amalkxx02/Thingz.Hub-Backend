@@ -7,25 +7,25 @@ from app.core.cache import CacheDB
 from app.core import security
 
 # cruds
-from app.auth import crud as auth_crud
-from app.users import crud as user_crud
-from app.tokens import crud as token_crud
+from app.module.auth import crud as auth_crud
+from app.module.users import crud as user_crud
+from app.module.tokens import crud as token_crud
 
 # services
-from app.users import service as user_service
-from app.tokens import service as token_service
+from app.module.users import service as user_service
+from app.module.tokens import service as token_service
 
 # models
-from app.auth.models import Auth
-from app.users.models import User
+from app.module.auth.models import Auth
+from app.module.users.models import User
 
 # schemas
-from app.auth.schemas import AuthModel, PasswordVerify, UserSignIn, UserSignUp, PasswordReset
+from app.module.auth.schemas import AuthModel, PasswordVerify, UserSignIn, UserSignUp, PasswordReset
 from app.common.response import MessageResponse
-from app.tokens.schemas import RefreshTokenResponse, TokenResponse
+from app.module.tokens.schemas import RefreshTokenResponse, TokenResponse
 
 # utils
-from app.users.schemas import UserModel
+from app.module.users.schemas import UserModel
 from app.utils import datetime_utils
 
 # =====================================================================

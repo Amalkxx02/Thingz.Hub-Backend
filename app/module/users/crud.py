@@ -3,7 +3,7 @@ from sqlalchemy import select, delete
 from sqlalchemy.dialects.postgresql import insert
 from uuid import UUID
 
-from app.users.models import User
+from app.module.users.models import User
 from app.utils.decorators import handle_db_errors
 
 # =====================================================================

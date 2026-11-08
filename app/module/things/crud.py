@@ -4,8 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import delete, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.exc import StatementError
-from app.things.models import Thing
-from app.devices.models import Device
+from app.module.things.models import Thing
+from app.module.devices.models import Device
 from uuid import UUID
 
 from app.utils.decorators import handle_db_errors

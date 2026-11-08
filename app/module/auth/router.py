@@ -2,11 +2,11 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.auth.schemas import PasswordVerify, UserSignIn, UserSignUp, PasswordReset
+from app.module.auth.schemas import PasswordVerify, UserSignIn, UserSignUp, PasswordReset
 from app.common.response import MessageResponse
 from app.api.dependencies import get_refresh_session
-from app.tokens.schemas import RefreshTokenResponse, TokenResponse
-from app.auth import services as auth_service
+from app.module.tokens.schemas import RefreshTokenResponse, TokenResponse
+from app.module.auth import services as auth_service
 from app.core.database import get_db
 from app.core.cache import CacheDB, get_cache_db
 
