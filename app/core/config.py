@@ -31,6 +31,11 @@ class Settings(BaseSettings):
     # --- Valkey Configuration ---
     VALKEY_URL: str
 
+    # --- Mail Configuration ---
+    EMAIL_API_KEY: str
+    EMAIL_FROM_ADDRESS: str
+    EMAIL_FROM_NAME: str = "ThingzHub"
+
     # --- CORS Configuration ---
     CORS_ORIGINS: list[str]
 
